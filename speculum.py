@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#! /usr/bin/env python3
 #
 #  speculum - An Arch Linux mirror list updater.
 #
