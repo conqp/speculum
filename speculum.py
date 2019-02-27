@@ -24,7 +24,7 @@
 
 Usage:
     speculum [options]
-    
+
 Options:
     --help, -h              Show this page.
 """
@@ -48,7 +48,7 @@ class Country(NamedTuple):
 
     def match(self, string):
         """Matches a country description."""
-        return str.lower() in (self.name.lower(), self.code.lower())
+        return string.lower() in (self.name.lower(), self.code.lower())
 
 
 class Mirror(NamedTuple):
