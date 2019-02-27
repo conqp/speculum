@@ -77,6 +77,14 @@ def get_sorting_key(sorting):
     return key
 
 
+def limit(mirrors, limit):  # pylint: disable=W0621
+    """Limit the amount of mirrors."""
+
+    for count, mirror in enumerate(mirrors):
+        if limit is None or count < limit:
+            yield mirror
+
+
 def get_args():
     """Returns the parsed arguments."""
 
@@ -105,6 +113,9 @@ def get_args():
         '--regex-excl', '-x', type=compile, default=None,
         metavar='regex_excl',
         help='exclude mirrors that match the regular expression')
+    parser.add_argument(
+        '--limit', '-l', type=int, default=None, metavar='file',
+        help='limit output to this amount of results')
     parser.add_argument(
         '--output', '-o', type=Path, default=None, metavar='file',
         help='write the output to the specified file instead of stdout')
@@ -148,6 +159,7 @@ def main():
         args.countries, args.protocols, args.max_age, args.regex_incl,
         args.regex_excl)
     mirrors = filter(filters.match, mirrors)
+    mirrors = limit(mirrors, args.limit)
     key = get_sorting_key(args.sort)
     mirrors = sorted(mirrors, key=key, reverse=args.reverse)
 
