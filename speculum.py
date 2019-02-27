@@ -250,7 +250,7 @@ class Mirror(NamedTuple):
             elif option == Sorting.COUNTRY:
                 key.append(self.country.sorting_key)
             elif option == Sorting.SCORE:
-                key.append(0 if self.score is None else -self.score)
+                key.append(float('inf') if self.score is None else self.score)
             elif option == Sorting.DELAY:
                 key.append(float('inf') if self.delay is None else self.delay)
             else:
