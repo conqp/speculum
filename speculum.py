@@ -24,8 +24,10 @@ from argparse import ArgumentParser
 from datetime import datetime, timedelta
 from enum import Enum
 from json import load
+from logging import INFO, basicConfig, getLogger
+from pathlib import Path
 from re import compile, Pattern     # pylint: disable=W0622
-from sys import stderr
+from sys import exit, stderr    # pylint: disable=W0622
 from typing import NamedTuple, Tuple
 from urllib.request import urlopen
 from urllib.parse import urlparse, ParseResult
@@ -34,6 +36,8 @@ from urllib.parse import urlparse, ParseResult
 MIRRORS_URL = 'https://www.archlinux.org/mirrors/status/json/'
 DATE_FORMAT = '%Y-%m-%dT%H:%M:%S%z'
 REPO_PATH = '$repo/os/$arch'
+LOG_FORMAT = '[%(levelname)s] %(name)s: %(message)s'
+LOGGER = getLogger(__file__)
 
 
 def strings(string):
@@ -101,12 +105,43 @@ def get_args():
         '--regex-excl', '-x', type=compile, default=None,
         metavar='regex_excl',
         help='exclude mirrors that match the regular expression')
+    parser.add_argument(
+        '--output', '-o', type=Path, default=None, metavar='file',
+        help='write the output to the specified file instead of stdout')
     return parser.parse_args()
+
+
+def dump_mirrors(mirrors, path):
+    """Dumps the mirrors to the given path."""
+
+    try:
+        with path.open('w') as file:
+            for mirror in mirrors:
+                file.write(mirror.mirrorlist_record + '\n')
+    except PermissionError as permission_error:
+        LOGGER.error(permission_error)
+        return 1
+
+    return 0
+
+
+def print_mirrors(mirrors):
+    """Prints the mirrors to STDOUT."""
+
+    for mirror in mirrors:
+        try:
+            print(mirror.mirrorlist_record, flush=True)
+        except BrokenPipeError:
+            stderr.close()
+            return 0
+
+    return 0
 
 
 def main():
     """Filters and sorts the mirrors."""
 
+    basicConfig(level=INFO, format=LOG_FORMAT)
     args = get_args()
     mirrors = get_mirrors()
     filters = Filter(
@@ -116,12 +151,10 @@ def main():
     key = get_sorting_key(args.sort)
     mirrors = sorted(mirrors, key=key, reverse=args.reverse)
 
-    for mirror in mirrors:
-        try:
-            print(mirror.mirrorlist_record, flush=True)
-        except BrokenPipeError:
-            stderr.close()
-            break
+    if args.output:
+        return dump_mirrors(mirrors, args.output)
+
+    return print_mirrors(mirrors)
 
 
 class Sorting(Enum):
@@ -294,4 +327,4 @@ class Filter(NamedTuple):
 
 
 if __name__ == '__main__':
-    main()
+    exit(main())
