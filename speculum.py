@@ -61,3 +61,5 @@ class Mirror(NamedTuple):
     score: float
     active: bool
     country: Country
+    isos: bool
+    
