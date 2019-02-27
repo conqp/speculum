@@ -25,6 +25,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 from json import load
 from re import compile, Pattern     # pylint: disable=W0622
+from sys import stderr
 from typing import NamedTuple, Tuple
 from urllib.request import urlopen
 from urllib.parse import urlparse, ParseResult
@@ -116,7 +117,11 @@ def main():
     mirrors = sorted(mirrors, key=key, reverse=args.reverse)
 
     for mirror in mirrors:
-        print(mirror.mirrorlist_record, flush=True)
+        try:
+            print(mirror.mirrorlist_record, flush=True)
+        except BrokenPipeError:
+            stderr.close()
+            break
 
 
 class Sorting(Enum):
