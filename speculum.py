@@ -29,22 +29,23 @@ Options:
     --help, -h              Show this page.
 """
 from datetime import datetime
+from typing import NamedTuple
 from urllib.parse import urlparse, ParseResult
 
 
 class Duration(NamedTuple):
     """Represents the duration data on a mirror."""
-    
+
     average: float
     stddev: float
-    
-    
+
+
 class Country(NamedTuple):
     """Represents country information."""
-    
+
     name: str
     code: str
-    
+
     def match(self, string):
         """Matches a country description."""
         return str.lower() in (self.name.lower(), self.code.lower())
@@ -52,7 +53,7 @@ class Country(NamedTuple):
 
 class Mirror(NamedTuple):
     """Represents information about a mirror."""
-    
+
     url: ParseResult
     last_sync: datetime
     completion: float
@@ -62,4 +63,6 @@ class Mirror(NamedTuple):
     active: bool
     country: Country
     isos: bool
-    
+    ipv4: bool
+    ipv6: bool
+    details: ParseResult
