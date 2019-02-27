@@ -67,9 +67,7 @@ def get_sorting_key(sorting):
     now = datetime.now()
 
     def key(mirror):
-        key = mirror.get_sorting_key(sorting, now)
-        print(key)
-        return key
+        return mirror.get_sorting_key(sorting, now)
 
     return key
 
