@@ -214,7 +214,7 @@ def dump_mirrors(mirrors: DataFrame, path: Path) -> int:
 
     try:
         with path.open('w') as file:
-            file.write(mirrorlist)
+            file.write(mirrorlist + linesep)
     except PermissionError as permission_error:
         LOGGER.error(permission_error)
         return 1
