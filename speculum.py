@@ -255,7 +255,7 @@ def main() -> int:
             mirrors = mirrors.sort_values(
                 args.sort, ascending=not args.reverse)
         except KeyError as key:
-            LOGGER.error(f'Cannot sort by key {key}.')
+            LOGGER.error('Cannot sort by key %s.', key)
             return 1
 
     if args.limit:
