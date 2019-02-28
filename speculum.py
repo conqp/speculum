@@ -22,17 +22,16 @@
 
 from argparse import ArgumentParser, Namespace
 from datetime import datetime
-from json import load
 from logging import INFO, basicConfig, getLogger
 from os import linesep
 from pathlib import Path
 from re import error, compile, Pattern  # pylint: disable=W0622
 from sys import exit, stderr    # pylint: disable=W0622
 from typing import Iterable
-from urllib.request import urlopen
 from urllib.parse import urlparse, ParseResult
 
 from pandas import to_datetime, DataFrame
+from requests import get
 
 
 MIRRORS_URL = 'https://www.archlinux.org/mirrors/status/json/'
@@ -61,11 +60,10 @@ def posint(string: str) -> int:
     raise ValueError('Integer must be greater than zero.')
 
 
-def get_json() -> dict:
+def get_mirrors(url=MIRRORS_URL) -> dict:
     """Returns the mirrors from the respective URL."""
 
-    with urlopen(MIRRORS_URL) as response:
-        return load(response)
+    return DataFrame(get(url).json()['url'])
 
 
 def iterprint(items: Iterable[str]):
@@ -234,7 +232,7 @@ def main() -> int:
 
     basicConfig(level=INFO, format=LOG_FORMAT)
     args = get_args()
-    mirrors = DataFrame(get_json()['urls'])
+    mirrors = get_mirrors()
 
     if args.list_countries:
         return list_countries(mirrors, reverse=args.reverse)
