@@ -166,27 +166,24 @@ def get_args() -> Namespace:
         '--list-countries', '-C', action='store_true',
         help='list the available countries')
     parser.add_argument(
-        '--sort', '-s', type=sorting, default=None,
-        metavar='<option>[,<option>...]',
+        '--sort', '-s', nargs='+', type=Sorting, metavar='<option>',
         help='sort by the respective sort options')
     parser.add_argument(
         '--reverse', '-r', action='store_true', help='sort in reversed order')
     parser.add_argument(
-        '--countries', '-c', type=stringset, default=None,
-        metavar='<country>[,<country>...]',
+        '--countries', '-c', nargs='+', metavar='<country>',
         help='match mirrors of these countries')
     parser.add_argument(
-        '--protocols', '-p', type=stringset, default=None,
-        metavar='<protocol>[,<protocol>...]',
+        '--protocols', '-p', nargs='+', metavar='<protocol>',
         help='match mirrors that use one of the specified protocols')
     parser.add_argument(
-        '--max-age', '-a', type=hours, default=None, metavar='hours',
+        '--max-age', '-a', type=hours, metavar='hours',
         help='match mirrors that use one of the specified protocols')
     parser.add_argument(
-        '--regex-match', '-m', type=regex, default=None, metavar='regex',
+        '--regex-match', '-m', type=regex, metavar='regex',
         help='match mirrors that match the regular expression')
     parser.add_argument(
-        '--regex-nomatch', '-n', type=regex, default=None, metavar='regex',
+        '--regex-nomatch', '-n', type=regex, metavar='regex',
         help='exclude mirrors that match the regular expression')
     parser.add_argument(
         '--complete', '-t', action='store_true',
@@ -203,10 +200,10 @@ def get_args() -> Namespace:
         '--isos', '-i', action='store_true',
         help='match mirrors that host ISOs')
     parser.add_argument(
-        '--limit', '-l', type=posint, default=None, metavar='n',
+        '--limit', '-l', type=posint, metavar='n',
         help='limit output to this amount of results')
     parser.add_argument(
-        '--output', '-o', type=Path, default=None, metavar='file',
+        '--output', '-o', type=Path, metavar='file',
         help='write the output to the specified file instead of stdout')
     args = parser.parse_args()
 
