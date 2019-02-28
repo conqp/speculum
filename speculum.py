@@ -168,7 +168,7 @@ def get_args() -> Namespace:
     parser.add_argument(
         '--sort', '-s', type=sorting, default=None,
         metavar='<option>[,<option>...]',
-        help='sort by the respective properties')
+        help='sort by the respective sort options')
     parser.add_argument(
         '--reverse', '-r', action='store_true', help='sort in reversed order')
     parser.add_argument(
@@ -203,7 +203,7 @@ def get_args() -> Namespace:
         '--isos', '-i', action='store_true',
         help='match mirrors that host ISOs')
     parser.add_argument(
-        '--limit', '-l', type=posint, default=None, metavar='file',
+        '--limit', '-l', type=posint, default=None, metavar='n',
         help='limit output to this amount of results')
     parser.add_argument(
         '--output', '-o', type=Path, default=None, metavar='file',
