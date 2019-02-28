@@ -154,50 +154,50 @@ def get_args() -> Namespace:
 
     parser = ArgumentParser(description=__doc__)
     parser.add_argument(
-        '--list-sortopts', '-S', action='store_true',
+        '-S', '--list-sortopts', action='store_true',
         help='list the available sorting options')
     parser.add_argument(
-        '--list-countries', '-C', action='store_true',
+        '-C', '--list-countries', action='store_true',
         help='list the available countries')
     parser.add_argument(
-        '--sort', '-s', nargs='+', metavar='<option>',
+        '-s', '--sort', nargs='+', metavar='<option>',
         help='sort by the respective sort options')
     parser.add_argument(
-        '--reverse', '-r', action='store_true', help='sort in reversed order')
+        '-r', '--reverse', action='store_true', help='sort in reversed order')
     parser.add_argument(
-        '--countries', '-c', nargs='+', type=lambda string: string.lower(),
+        '-c', '--countries', nargs='+', type=lambda string: string.lower(),
         metavar='<country>', help='match mirrors of these countries')
     parser.add_argument(
-        '--protocols', '-p', nargs='+', metavar='<protocol>',
+        '-p', '--protocols', nargs='+', metavar='<protocol>',
         help='match mirrors that use one of the specified protocols')
     parser.add_argument(
-        '--max-age', '-a', type=posint, metavar='hours',
+        '-a', '--max-age', type=posint, metavar='hours',
         help='match mirrors that use one of the specified protocols')
     parser.add_argument(
-        '--regex-match', '-m', type=regex, metavar='regex',
+        '-m', '--regex-match', type=regex, metavar='regex',
         help='match mirrors that match the regular expression')
     parser.add_argument(
-        '--regex-nomatch', '-n', type=regex, metavar='regex',
+        '-n', '--regex-nomatch', type=regex, metavar='regex',
         help='exclude mirrors that match the regular expression')
     parser.add_argument(
-        '--complete', '-t', action='store_true',
+        '-t', '--complete', action='store_true',
         help='match mirrors that are completely synced')
     parser.add_argument(
-        '--active', '-u', action='store_true', help='match active mirrors')
+        '-u', '--active', action='store_true', help='match active mirrors')
     parser.add_argument(
-        '--ipv4', '-4', action='store_true',
+        '-4', '--ipv4', action='store_true',
         help='match mirrors that support IPv4')
     parser.add_argument(
-        '--ipv6', '-6', action='store_true',
+        '-6', '--ipv6', action='store_true',
         help='match mirrors that support IPv6')
     parser.add_argument(
-        '--isos', '-i', action='store_true',
+        '-i', '--isos', action='store_true',
         help='match mirrors that host ISOs')
     parser.add_argument(
-        '--limit', '-l', type=posint, metavar='n',
+        '-l', '--limit', type=posint, metavar='n',
         help='limit output to this amount of results')
     parser.add_argument(
-        '--output', '-o', type=Path, metavar='file',
+        '-o', '--output', type=Path, metavar='file',
         help='write the output to the specified file instead of stdout')
     args = parser.parse_args()
 
