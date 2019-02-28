@@ -244,8 +244,8 @@ class Country(NamedTuple):
     @property
     def sorting_key(self) -> Tuple[str]:
         """Returns a sorting key."""
-        name = 'zzz' if self.name is None else self.name
-        code = 'zz' if self.code is None else self.code
+        name = '~' if self.name is None else self.name
+        code = '~' if self.code is None else self.code
         return (name, code)
 
 
