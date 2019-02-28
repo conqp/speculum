@@ -47,7 +47,7 @@ def strings(string: str) -> filter:
     return filter(None, map(lambda s: s.strip().lower(), string.split(',')))
 
 
-def stringset(string: str) -> Tuple[str]:
+def stringset(string: str) -> FrozenSet[str]:
     """Returns a tuple of strings form a comma separated list."""
 
     return frozenset(strings(string))
