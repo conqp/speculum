@@ -255,7 +255,8 @@ class Mirror(NamedTuple):
         last_sync = json['last_sync']
 
         if last_sync is not None:
-            last_sync = datetime.strptime(last_sync, DATE_FORMAT)
+            last_sync = datetime.strptime(last_sync, DATE_FORMAT).replace(
+                tzinfo=None)
 
         duration_avg = json['duration_avg']
         duration_stddev = json['duration_stddev']
@@ -298,7 +299,7 @@ class Mirror(NamedTuple):
                 if self.last_sync is None:
                     key.append(now - datetime.fromtimestamp(0))
                 else:
-                    key.append(now - self.last_sync.replace(tzinfo=None))
+                    key.append(now - self.last_sync)
             elif option == Sorting.RATE:
                 key.append(self.duration.sorting_key)
             elif option == Sorting.COUNTRY:
