@@ -34,6 +34,8 @@ from typing import Callable, FrozenSet, Generator, Iterable, NamedTuple, Tuple
 from urllib.request import urlopen
 from urllib.parse import urlparse, ParseResult
 
+from pandas import DataFrame
+
 
 MIRRORS_URL = 'https://www.archlinux.org/mirrors/status/json/'
 DATE_FORMAT = '%Y-%m-%dT%H:%M:%S%z'
@@ -83,13 +85,6 @@ def get_json() -> dict:
         return load(response)
 
 
-def get_mirrors() -> Generator[Mirror]:
-    """Yields the respective mirrors."""
-
-    for json in get_json()['urls']:
-        yield Mirror.from_json(json)
-
-
 def get_sorting_key(order: Tuple[Sorting]) -> Callable:
     """Returns a key function to sort mirrors."""
 
@@ -101,7 +96,7 @@ def get_sorting_key(order: Tuple[Sorting]) -> Callable:
     return key
 
 
-def limit(mirrors: Iterable[Mirror], maximum: int) -> Generator[Mirror]:
+def limit(mirrors: Iterable[DataFrame], maximum: int) -> Generator[DataFrame]:
     """Limit the amount of mirrors."""
 
     for count, mirror in enumerate(mirrors, start=1):
@@ -131,7 +126,7 @@ def list_sorting_options(reverse: bool = False) -> int:
     return 0
 
 
-def list_countries(mirrors: Iterable[Mirror], reverse: bool = False) -> int:
+def list_countries(mirrors: Iterable[DataFrame], reverse: bool = False) -> int:
     """Lists available countries."""
 
     countries = map(lambda mirror: mirror.country, mirrors)
@@ -199,7 +194,7 @@ def get_args() -> Namespace:
     return args
 
 
-def dump_mirrors(mirrors: Iterable[Mirror], path: Path) -> int:
+def dump_mirrors(mirrors: Iterable[DataFrame], path: Path) -> int:
     """Dumps the mirrors to the given path."""
 
     mirrorlist = linesep.join(mirror.mirrorlist_record for mirror in mirrors)
@@ -214,7 +209,7 @@ def dump_mirrors(mirrors: Iterable[Mirror], path: Path) -> int:
     return 0
 
 
-def print_mirrors(mirrors: Iterable[Mirror]) -> int:
+def print_mirrors(mirrors: Iterable[DataFrame]) -> int:
     """Prints the mirrors to STDOUT."""
 
     iterprint(mirror.mirrorlist_record for mirror in mirrors)
@@ -230,7 +225,7 @@ def main() -> int:
     if args.list_sortopts:
         return list_sorting_options(reverse=args.reverse)
 
-    mirrors = get_mirrors()
+    mirrors = DataFrame(get_json()['urls'])
 
     if args.list_countries:
         return list_countries(mirrors, reverse=args.reverse)
@@ -305,86 +300,21 @@ class Country(NamedTuple):
         """Determines whether there is not country information available."""
         return not self.name and not self.code
 
+@property
+def mirrorlist_url(self) -> ParseResult:
+    """Returns a mirror list URL."""
+    scheme, netloc, path, params, query, fragment = self.url
 
-class Mirror(NamedTuple):
-    """Represents information about a mirror."""
+    if not path.endswith('/'):
+        path += '/'
 
-    url: ParseResult
-    last_sync: datetime
-    completion: float
-    delay: int
-    duration: Duration
-    score: float
-    active: bool
-    country: Country
-    isos: bool
-    ipv4: bool
-    ipv6: bool
-    details: ParseResult
+    return ParseResult(
+        scheme, netloc, path + REPO_PATH, params, query, fragment)
 
-    @classmethod
-    def from_json(cls, json: dict) -> Mirror:
-        """Returns a new mirror from a JSON-ish dict."""
-        url = urlparse(json['url'])
-        last_sync = json['last_sync']
-
-        if last_sync is not None:
-            last_sync = datetime.strptime(last_sync, DATE_FORMAT).replace(
-                tzinfo=None)
-
-        duration_avg = json['duration_avg']
-        duration_stddev = json['duration_stddev']
-        duration = Duration(duration_avg, duration_stddev)
-        country = json['country']
-        country_code = json['country_code']
-        country = Country(country, country_code)
-        details = urlparse(json['details'])
-        return cls(
-            url, last_sync, json['completion_pct'], json['delay'], duration,
-            json['score'], json['active'], country, json['isos'], json['ipv4'],
-            json['ipv6'], details)
-
-    @property
-    def mirrorlist_url(self) -> ParseResult:
-        """Returns a mirror list URL."""
-        scheme, netloc, path, params, query, fragment = self.url
-
-        if not path.endswith('/'):
-            path += '/'
-
-        return ParseResult(
-            scheme, netloc, path + REPO_PATH, params, query, fragment)
-
-    @property
-    def mirrorlist_record(self) -> str:
-        """Returns a mirror list record."""
-        return f'Server = {self.mirrorlist_url.geturl()}'
-
-    def get_sorting_key(self, order: Tuple[Sorting], now: datetime) -> Tuple:
-        """Returns a tuple of the soring keys in the desired order."""
-        if not order:
-            return ()
-
-        key = []
-
-        for option in order:
-            if option == Sorting.AGE:
-                if self.last_sync is None:
-                    key.append(now - datetime.fromtimestamp(0))
-                else:
-                    key.append(now - self.last_sync)
-            elif option == Sorting.RATE:
-                key.append(self.duration.sorting_key)
-            elif option == Sorting.COUNTRY:
-                key.append(self.country.sorting_key)
-            elif option == Sorting.SCORE:
-                key.append(float('inf') if self.score is None else self.score)
-            elif option == Sorting.DELAY:
-                key.append(float('inf') if self.delay is None else self.delay)
-            else:
-                raise ValueError(f'Invalid sorting option: {option}.')
-
-        return tuple(key)
+@property
+def mirrorlist_record(self) -> str:
+    """Returns a mirror list record."""
+    return f'Server = {self.mirrorlist_url.geturl()}'
 
 
 class Filter(NamedTuple):
@@ -409,10 +339,11 @@ class Filter(NamedTuple):
             args.regex_nomatch, args.complete, args.active, args.ipv4,
             args.ipv6, args.isos)
 
-    def match_fails(self, mirror: Mirror) -> bool:
+    def match_fails(self, mirrors: DataFrame) -> bool:
         """Yields True on failed matches."""
         # Boolean tests first.
-        yield self.active and not mirror.active
+        if self.active:
+            mirrors =
         yield self.ipv4 and not mirror.ipv4
         yield self.ipv6 and not mirror.ipv6
         yield self.isos and not mirror.isos
@@ -436,7 +367,7 @@ class Filter(NamedTuple):
         if self.regex_nomatch is not None:
             yield self.regex_nomatch.match(mirror.url.geturl())
 
-    def match(self, mirror: Mirror) -> bool:
+    def match(self, mirror: DataFrame) -> bool:
         """Matches the mirror."""
         return not any(self.match_fails(mirror))
 
