@@ -27,7 +27,7 @@ from enum import Enum
 from json import load
 from logging import INFO, basicConfig, getLogger
 from pathlib import Path
-from re import compile as regex, Pattern
+from re import error, compile, Pattern  # pylint: disable=W0622
 from sys import exit, stderr    # pylint: disable=W0622
 from typing import Callable, Generator, Iterable, NamedTuple, Tuple
 from urllib.request import urlopen
@@ -59,6 +59,15 @@ def hours(string: str) -> timedelta:
     """
 
     return timedelta(hours=int(string))
+
+
+def regex(string: str) -> Pattern:
+    """Returns a regular expression."""
+
+    try:
+        return compile(string)
+    except error:
+        raise ValueError(str(error))
 
 
 def get_json() -> dict:
