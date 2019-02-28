@@ -63,7 +63,7 @@ def posint(string: str) -> int:
 def get_mirrors(url=MIRRORS_URL) -> dict:
     """Returns the mirrors from the respective URL."""
 
-    return DataFrame(get(url).json()['url'])
+    return DataFrame(get(url).json()['urls'])
 
 
 def iterprint(items: Iterable[str]):
