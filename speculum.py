@@ -141,10 +141,11 @@ def get_args() -> Namespace:
 def dump_mirrors(mirrors: Iterable[Mirror], path: Path) -> int:
     """Dumps the mirrors to the given path."""
 
+    mirrorlist = '\n'.join(mirror.mirrorlist_record for mirror in mirrors)
+
     try:
         with path.open('w') as file:
-            for mirror in mirrors:
-                file.write(mirror.mirrorlist_record + '\n')
+            file.write(mirrorlist)
     except PermissionError as permission_error:
         LOGGER.error(permission_error)
         return 1
