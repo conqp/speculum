@@ -29,7 +29,7 @@ from logging import INFO, basicConfig, getLogger
 from pathlib import Path
 from re import error, compile, Pattern  # pylint: disable=W0622
 from sys import exit, stderr    # pylint: disable=W0622
-from typing import Callable, Generator, Iterable, NamedTuple, Tuple
+from typing import Callable, FrozenSet, Generator, Iterable, NamedTuple, Tuple
 from urllib.request import urlopen
 from urllib.parse import urlparse, ParseResult
 
@@ -47,10 +47,10 @@ def strings(string: str) -> filter:
     return filter(None, map(lambda s: s.strip().lower(), string.split(',')))
 
 
-def stringtuple(string: str) -> Tuple[str]:
+def stringset(string: str) -> Tuple[str]:
     """Returns a tuple of strings form a comma separated list."""
 
-    return tuple(strings(string))
+    return frozenset(strings(string))
 
 
 def hours(string: str) -> timedelta:
@@ -115,11 +115,10 @@ def get_args() -> Namespace:
     parser.add_argument(
         '--reverse', '-r', action='store_true', help='sort in reversed order')
     parser.add_argument(
-        '--countries', '-c', type=stringtuple, default=None,
-        metavar='countries', help='match mirrors of these countries')
+        '--countries', '-c', type=stringset, default=None, metavar='countries',
+        help='match mirrors of these countries')
     parser.add_argument(
-        '--protocols', '-p', type=stringtuple, default=None,
-        metavar='protocols',
+        '--protocols', '-p', type=stringset, default=None, metavar='protocols',
         help='match mirrors that use one of the specified protocols')
     parser.add_argument(
         '--max-age', '-a', type=hours, default=None, metavar='max_age',
@@ -324,8 +323,8 @@ class Mirror(NamedTuple):
 class Filter(NamedTuple):
     """Represents a set of mirror filtering options."""
 
-    countries: Tuple[str]
-    protocols: Tuple[str]
+    countries: FrozenSet[str]
+    protocols: FrozenSet[str]
     max_age: timedelta
     regex_incl: Pattern
     regex_excl: Pattern
