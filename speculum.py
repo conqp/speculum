@@ -71,6 +71,14 @@ def regex(string: str) -> Pattern:
         raise ValueError(str(error))
 
 
+def sorting(string: str) -> Tuple[Sorting]:
+    """Returns a tuple of sorting options
+    from comma-separated string values.
+    """
+
+    return tuple(Sorting.from_string(string))
+
+
 def get_json() -> dict:
     """Returns the mirrors from the respective URL."""
 
@@ -85,13 +93,13 @@ def get_mirrors() -> Generator[Mirror]:
         yield Mirror.from_json(json)
 
 
-def get_sorting_key(sorting: str) -> Callable:
+def get_sorting_key(order: Tuple[Sorting]) -> Callable:
     """Returns a key function to sort mirrors."""
 
     now = datetime.now()
 
     def key(mirror):
-        return mirror.get_sorting_key(sorting, now)
+        return mirror.get_sorting_key(order, now)
 
     return key
 
@@ -111,8 +119,8 @@ def get_args() -> Namespace:
 
     parser = ArgumentParser(description=__doc__)
     parser.add_argument(
-        '--sort', '-s', type=Sorting.from_string, default=None,
-        metavar='sorting', help='sort by the respective property')
+        '--sort', '-s', type=sorting, default=None, metavar='sorting',
+        help='sort by the respective properties')
     parser.add_argument(
         '--reverse', '-r', action='store_true', help='sort in reversed order')
     parser.add_argument(
@@ -205,16 +213,10 @@ class Sorting(Enum):
     DELAY = 'delay'
 
     @classmethod
-    def from_string(cls, string: str) -> Tuple[Sorting]:
+    def from_string(cls, string: str) -> Generator[Sorting]:
         """Returns a tuple of sortings from the respective string."""
-        options = []
-
-        for option in string.split(','):
-            option = option.strip().lower()
-            option = cls(option)
-            options.append(option)
-
-        return tuple(options)
+        for option in strings(string):
+            yield cls(option)
 
 
 class Duration(NamedTuple):
@@ -303,14 +305,14 @@ class Mirror(NamedTuple):
         """Returns a mirror list record."""
         return f'Server = {self.mirrorlist_url.geturl()}'
 
-    def get_sorting_key(self, options: Tuple[Sorting], now: datetime) -> Tuple:
+    def get_sorting_key(self, order: Tuple[Sorting], now: datetime) -> Tuple:
         """Returns a tuple of the soring keys in the desired order."""
-        if not options:
+        if not order:
             return ()
 
         key = []
 
-        for option in options:
+        for option in order:
             if option == Sorting.AGE:
                 if self.last_sync is None:
                     key.append(now - datetime.fromtimestamp(0))
