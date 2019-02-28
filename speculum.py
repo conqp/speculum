@@ -20,7 +20,8 @@
 ##############################################################################
 """Yet another Arch Linux mirrorlist optimizer."""
 
-from argparse import ArgumentParser
+from __future__ import annotations
+from argparse import ArgumentParser, Namespace
 from datetime import datetime, timedelta
 from enum import Enum
 from json import load
@@ -28,7 +29,7 @@ from logging import INFO, basicConfig, getLogger
 from pathlib import Path
 from re import compile, Pattern     # pylint: disable=W0622
 from sys import exit, stderr    # pylint: disable=W0622
-from typing import NamedTuple, Tuple
+from typing import Callable, Generator, Iterable, NamedTuple, Tuple
 from urllib.request import urlopen
 from urllib.parse import urlparse, ParseResult
 
@@ -40,19 +41,19 @@ LOG_FORMAT = '[%(levelname)s] %(name)s: %(message)s'
 LOGGER = getLogger(__file__)
 
 
-def strings(string):
+def strings(string: str) -> filter:
     """Splits strings by comma."""
 
     return filter(None, map(lambda s: s.strip().lower(), string.split(',')))
 
 
-def stringtuple(string):
+def stringtuple(string: str) -> Tuple[str]:
     """Returns a tuple of strings form a comma separated list."""
 
     return tuple(strings(string))
 
 
-def hours(string):
+def hours(string: str) -> timedelta:
     """Returns a timedelta of the respective
     amount of hours from a string.
     """
@@ -60,21 +61,21 @@ def hours(string):
     return timedelta(hours=int(string))
 
 
-def get_json():
+def get_json() -> dict:
     """Returns the mirrors from the respective URL."""
 
     with urlopen(MIRRORS_URL) as response:
         return load(response)
 
 
-def get_mirrors():
+def get_mirrors() -> Generator[Mirror]:
     """Yields the respective mirrors."""
 
     for json in get_json()['urls']:
         yield Mirror.from_json(json)
 
 
-def get_sorting_key(sorting):
+def get_sorting_key(sorting: str) -> Callable:
     """Returns a key function to sort mirrors."""
 
     now = datetime.now()
@@ -85,17 +86,17 @@ def get_sorting_key(sorting):
     return key
 
 
-def limit(mirrors, limit):  # pylint: disable=W0621
+def limit(mirrors: Iterable[Mirror], maximum: int) -> Generator[Mirror]:
     """Limit the amount of mirrors."""
 
     for count, mirror in enumerate(mirrors, start=1):
-        if limit is not None and count > limit:
+        if maximum is not None and count > maximum:
             break
 
         yield mirror
 
 
-def get_args():
+def get_args() -> Namespace:
     """Returns the parsed arguments."""
 
     parser = ArgumentParser(description=__doc__)
@@ -131,7 +132,7 @@ def get_args():
     return parser.parse_args()
 
 
-def dump_mirrors(mirrors, path):
+def dump_mirrors(mirrors: Iterable[Mirror], path: Path) -> int:
     """Dumps the mirrors to the given path."""
 
     try:
@@ -145,7 +146,7 @@ def dump_mirrors(mirrors, path):
     return 0
 
 
-def print_mirrors(mirrors):
+def print_mirrors(mirrors: Iterable[Mirror]) -> int:
     """Prints the mirrors to STDOUT."""
 
     for mirror in mirrors:
@@ -158,7 +159,7 @@ def print_mirrors(mirrors):
     return 0
 
 
-def main():
+def main() -> int:
     """Filters and sorts the mirrors."""
 
     basicConfig(level=INFO, format=LOG_FORMAT)
@@ -188,7 +189,7 @@ class Sorting(Enum):
     DELAY = 'delay'
 
     @classmethod
-    def from_string(cls, string):
+    def from_string(cls, string: str) -> Tuple[Sorting]:
         """Returns a tuple of sortings from the respective string."""
         options = []
 
@@ -207,7 +208,7 @@ class Duration(NamedTuple):
     stddev: float
 
     @property
-    def sorting_key(self):
+    def sorting_key(self) -> Tuple[float]:
         """Returns a sorting key."""
         average = float('inf') if self.average is None else self.average
         stddev = float('inf') if self.stddev is None else self.stddev
@@ -220,12 +221,12 @@ class Country(NamedTuple):
     name: str
     code: str
 
-    def match(self, string):
+    def match(self, string: str) -> bool:
         """Matches a country description."""
         return string.lower() in {self.name.lower(), self.code.lower()}
 
     @property
-    def sorting_key(self):
+    def sorting_key(self) -> Tuple[str]:
         """Returns a sorting key."""
         name = 'zzz' if self.name is None else self.name
         code = 'zz' if self.code is None else self.code
@@ -249,7 +250,7 @@ class Mirror(NamedTuple):
     details: ParseResult
 
     @classmethod
-    def from_json(cls, json):
+    def from_json(cls, json: dict) -> Mirror:
         """Returns a new mirror from a JSON-ish dict."""
         url = urlparse(json['url'])
         last_sync = json['last_sync']
@@ -271,7 +272,7 @@ class Mirror(NamedTuple):
             json['ipv6'], details)
 
     @property
-    def mirrorlist_url(self):
+    def mirrorlist_url(self) -> ParseResult:
         """Returns a mirror list URL."""
         scheme, netloc, path, params, query, fragment = self.url
 
@@ -282,12 +283,12 @@ class Mirror(NamedTuple):
             scheme, netloc, path + REPO_PATH, params, query, fragment)
 
     @property
-    def mirrorlist_record(self):
+    def mirrorlist_record(self) -> str:
         """Returns a mirror list record."""
         return f'Server = {self.mirrorlist_url.geturl()}'
 
 
-    def get_sorting_key(self, options, now):
+    def get_sorting_key(self, options: Tuple[Sorting], now: datetime) -> Tuple:
         """Returns a tuple of the soring keys in the desired order."""
         if not options:
             return ()
@@ -323,7 +324,7 @@ class Filter(NamedTuple):
     regex_incl: Pattern
     regex_excl: Pattern
 
-    def match(self, mirror):
+    def match(self, mirror: Mirror) -> bool:
         """Matches the mirror."""
         if self.countries is not None:
             if not any(mirror.country.match(c) for c in self.countries):
