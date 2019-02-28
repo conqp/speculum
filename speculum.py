@@ -125,10 +125,46 @@ def limit(mirrors: Iterable[Mirror], maximum: int) -> Generator[Mirror]:
         yield mirror
 
 
+def iterprint(items: Iterable[str]):
+    """Prints the items one by one, catching BrokenPipeErrors."""
+
+    for item in items:
+        try:
+            print(item, flush=True)
+        except BrokenPipeError:
+            stderr.close()
+            break
+
+
+def list_sorting_options(reverse: bool = False) -> int:
+    """Lists available sorting options."""
+
+    options = (option.value for option in Sorting)
+    options = sorted(options, reverse=reverse)
+    iterprint(options)
+    return 0
+
+
+def list_countries(mirrors: Iterable[Mirror], reverse: bool = False) -> int:
+    """Lists available countries."""
+
+    countries = map(lambda mirror: mirror.country, mirrors)
+    countries = filter(lambda country: not country.empty, countries)
+    countries = sorted(frozenset(countries), reverse=reverse)
+    iterprint(f'{country.name} ({country.code})' for country in countries)
+    return 0
+
+
 def get_args() -> Namespace:
     """Returns the parsed arguments."""
 
     parser = ArgumentParser(description=__doc__)
+    parser.add_argument(
+        '--list-sortopts', '-S', action='store_true',
+        help='list the available sorting options')
+    parser.add_argument(
+        '--list-countries', '-C', action='store_true',
+        help='list the available countries')
     parser.add_argument(
         '--sort', '-s', type=sorting, default=None, metavar='sorting',
         help='sort by the respective properties')
@@ -155,7 +191,12 @@ def get_args() -> Namespace:
     parser.add_argument(
         '--output', '-o', type=Path, default=None, metavar='file',
         help='write the output to the specified file instead of stdout')
-    return parser.parse_args()
+    args = parser.parse_args()
+
+    if args.list_sortopts and args.list_countries:
+        parser.error('Listing of options and countries is mutually exclusive.')
+
+    return args
 
 
 def dump_mirrors(mirrors: Iterable[Mirror], path: Path) -> int:
@@ -176,13 +217,7 @@ def dump_mirrors(mirrors: Iterable[Mirror], path: Path) -> int:
 def print_mirrors(mirrors: Iterable[Mirror]) -> int:
     """Prints the mirrors to STDOUT."""
 
-    for mirror in mirrors:
-        try:
-            print(mirror.mirrorlist_record, flush=True)
-        except BrokenPipeError:
-            stderr.close()
-            return 0
-
+    iterprint(mirror.mirrorlist_record for mirror in mirrors)
     return 0
 
 
@@ -191,13 +226,19 @@ def main() -> int:
 
     basicConfig(level=INFO, format=LOG_FORMAT)
     args = get_args()
+
+    if args.list_sortopts:
+        return list_sorting_options(reverse=args.reverse)
+
     mirrors = get_mirrors()
-    filters = Filter(
-        args.countries, args.protocols, args.max_age, args.regex_incl,
-        args.regex_excl)
-    mirrors = filter(filters.match, mirrors)
-    key = get_sorting_key(args.sort)
-    mirrors = sorted(mirrors, key=key, reverse=args.reverse)
+
+    if args.list_countries:
+        return list_countries(mirrors, reverse=args.reverse)
+
+    fltr = Filter.from_args(args)
+    mirrors = filter(fltr.match, mirrors)
+    sorting_key = get_sorting_key(args.sort)
+    mirrors = sorted(mirrors, key=sorting_key, reverse=args.reverse)
     mirrors = limit(mirrors, args.limit)
     mirrors = tuple(mirrors)
 
@@ -257,9 +298,12 @@ class Country(NamedTuple):
     @property
     def sorting_key(self) -> Tuple[str]:
         """Returns a sorting key."""
-        name = '~' if self.name is None else self.name
-        code = '~' if self.code is None else self.code
-        return (name, code)
+        return (self.name or '~', self.name or '~')
+
+    @property
+    def empty(self):
+        """Determines whether there is not country information available."""
+        return not self.name and not self.code
 
 
 class Mirror(NamedTuple):
@@ -351,6 +395,13 @@ class Filter(NamedTuple):
     max_age: timedelta
     regex_incl: Pattern
     regex_excl: Pattern
+
+    @classmethod
+    def from_args(cls, args):
+        """Returns a filter instance from the respective CLI arguments."""
+        return cls(
+            args.countries, args.protocols, args.max_age, args.regex_incl,
+            args.regex_excl)
 
     def match(self, mirror: Mirror) -> bool:
         """Matches the mirror."""
