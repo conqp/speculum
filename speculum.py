@@ -37,7 +37,6 @@ from pandas import to_datetime, DataFrame
 
 MIRRORS_URL = 'https://www.archlinux.org/mirrors/status/json/'
 REPO_PATH = '$repo/os/$arch'
-SORTING_OPTIONS = ('age', 'duration_avg', 'country', 'score', 'delay')
 LOG_FORMAT = '[%(levelname)s] %(name)s: %(message)s'
 LOGGER = getLogger(__file__)
 
@@ -235,11 +234,6 @@ def main() -> int:
 
     basicConfig(level=INFO, format=LOG_FORMAT)
     args = get_args()
-
-    if args.list_sortopts:
-        iterprint(sorted(SORTING_OPTIONS, reverse=args.reverse))
-        return 0
-
     mirrors = DataFrame(get_json()['urls'])
 
     if args.list_countries:
@@ -249,6 +243,11 @@ def main() -> int:
     last_sync = to_datetime(mirrors.last_sync).dt.tz_convert(None)
     timediff = datetime.now() - last_sync
     mirrors['age'] = timediff.dt.total_seconds() / 3600
+    columns = mirrors.columns.values
+
+    if args.list_sortopts:
+        iterprint(sorted(columns, reverse=args.reverse))
+        return 0
 
     if args.sort:
         mirrors = mirrors.sort_values(args.sort, ascending=not args.reverse)
