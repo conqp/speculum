@@ -43,13 +43,13 @@ LOGGER = getLogger(__file__)
 
 
 def strings(string: str) -> filter:
-    """Splits strings by comma."""
+    """Yields non-empty stripped lower case strings, splitted by comma."""
 
     return filter(None, map(lambda s: s.strip().lower(), string.split(',')))
 
 
 def stringset(string: str) -> FrozenSet[str]:
-    """Returns a tuple of strings form a comma separated list."""
+    """Returns a set of strings form a comma separated list."""
 
     return frozenset(strings(string))
 
