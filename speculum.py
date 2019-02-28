@@ -79,6 +79,17 @@ def sorting(string: str) -> Tuple[Sorting]:
     return tuple(Sorting.from_string(string))
 
 
+def posint(string: str) -> int:
+    """Returns a positive integer."""
+
+    integer = int(str)
+
+    if integer > 0:
+        return integer
+
+    raise ValueError('Integer must be greater than zero.')
+
+
 def get_json() -> dict:
     """Returns the mirrors from the respective URL."""
 
@@ -139,7 +150,7 @@ def get_args() -> Namespace:
         '--regex-excl', '-x', type=regex, default=None, metavar='regex_excl',
         help='exclude mirrors that match the regular expression')
     parser.add_argument(
-        '--limit', '-l', type=int, default=None, metavar='file',
+        '--limit', '-l', type=posint, default=None, metavar='file',
         help='limit output to this amount of results')
     parser.add_argument(
         '--output', '-o', type=Path, default=None, metavar='file',
