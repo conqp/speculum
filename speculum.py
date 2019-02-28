@@ -27,7 +27,7 @@ from enum import Enum
 from json import load
 from logging import INFO, basicConfig, getLogger
 from pathlib import Path
-from re import compile, Pattern     # pylint: disable=W0622
+from re import compile as regex, Pattern
 from sys import exit, stderr    # pylint: disable=W0622
 from typing import Callable, Generator, Iterable, NamedTuple, Tuple
 from urllib.request import urlopen
@@ -116,12 +116,10 @@ def get_args() -> Namespace:
         '--max-age', '-a', type=hours, default=None, metavar='max_age',
         help='match mirrors that use one of the specified protocols')
     parser.add_argument(
-        '--regex-incl', '-i', type=compile, default=None,
-        metavar='regex_incl',
+        '--regex-incl', '-i', type=regex, default=None, metavar='regex_incl',
         help='match mirrors that match the regular expression')
     parser.add_argument(
-        '--regex-excl', '-x', type=compile, default=None,
-        metavar='regex_excl',
+        '--regex-excl', '-x', type=regex, default=None, metavar='regex_excl',
         help='exclude mirrors that match the regular expression')
     parser.add_argument(
         '--limit', '-l', type=int, default=None, metavar='file',
