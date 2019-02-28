@@ -20,9 +20,8 @@
 ##############################################################################
 """Yet another Arch Linux mirrorlist optimizer."""
 
-from __future__ import annotations
 from argparse import ArgumentParser, Namespace
-from datetime import timedelta
+from datetime import datetime
 from json import load
 from logging import INFO, basicConfig, getLogger
 from os import linesep
@@ -33,7 +32,7 @@ from typing import Generator, Iterable
 from urllib.request import urlopen
 from urllib.parse import urlparse, ParseResult
 
-from pandas import DataFrame
+from pandas import to_datetime, DataFrame
 
 
 MIRRORS_URL = 'https://www.archlinux.org/mirrors/status/json/'
@@ -41,14 +40,6 @@ REPO_PATH = '$repo/os/$arch'
 SORTING_OPTIONS = ('age', 'duration_avg', 'country', 'score', 'delay')
 LOG_FORMAT = '[%(levelname)s] %(name)s: %(message)s'
 LOGGER = getLogger(__file__)
-
-
-def hours(string: str) -> timedelta:
-    """Returns a timedelta of the respective
-    amount of hours from a string.
-    """
-
-    return timedelta(hours=int(string))
 
 
 def regex(string: str) -> Pattern:
@@ -145,16 +136,16 @@ def filter_mirrors(mirrors: DataFrame, args: Namespace) -> DataFrame:
         mirrors = mirrors[mirrors.completion_pct == 1]
 
     if args.active:
-        mirrors = mirrors[mirrors.active == True]   # pylint: disable=C0121
+        mirrors = mirrors[mirrors.active]
 
     if args.ipv4:
-        mirrors = mirrors[mirrors.ipv4 == True]     # pylint: disable=C0121
+        mirrors = mirrors[mirrors.ipv4]
 
     if args.ipv6:
-        mirrors = mirrors[mirrors.ipv6 == True]     # pylint: disable=C0121
+        mirrors = mirrors[mirrors.ipv6]
 
     if args.isos:
-        mirrors = mirrors[mirrors.isos == True]     # pylint: disable=C0121
+        mirrors = mirrors[mirrors.isos]
 
     return mirrors
 
@@ -181,7 +172,7 @@ def get_args() -> Namespace:
         '--protocols', '-p', nargs='+', metavar='<protocol>',
         help='match mirrors that use one of the specified protocols')
     parser.add_argument(
-        '--max-age', '-a', type=hours, metavar='hours',
+        '--max-age', '-a', type=posint, metavar='hours',
         help='match mirrors that use one of the specified protocols')
     parser.add_argument(
         '--regex-match', '-m', type=regex, metavar='regex',
@@ -255,6 +246,8 @@ def main() -> int:
         return list_countries(mirrors, reverse=args.reverse)
 
     mirrors = filter_mirrors(mirrors, args)
+    timediff = datetime.now() - to_datetime(mirrors.last_sync)
+    mirrors['age'] = timediff.dt.total_seconds() / 3600
 
     if args.sort:
         mirrors = mirrors.sort_values(args.sort, ascending=not args.reverse)
