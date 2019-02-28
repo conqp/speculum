@@ -178,6 +178,14 @@ def main() -> int:
     key = get_sorting_key(args.sort)
     mirrors = sorted(mirrors, key=key, reverse=args.reverse)
     mirrors = limit(mirrors, args.limit)
+    mirrors = tuple(mirrors)
+
+    if not mirrors and args.limit != 0:
+        LOGGER.error('No mirrors found.')
+        return 1
+
+    if args.limit is not None and len(mirrors) < args.limit:
+        LOGGER.warning('Filter yielded less mirrors than specified limit.')
 
     if args.output:
         return dump_mirrors(mirrors, args.output)
