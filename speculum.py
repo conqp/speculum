@@ -159,9 +159,9 @@ def main():
         args.countries, args.protocols, args.max_age, args.regex_incl,
         args.regex_excl)
     mirrors = filter(filters.match, mirrors)
-    mirrors = limit(mirrors, args.limit)
     key = get_sorting_key(args.sort)
     mirrors = sorted(mirrors, key=key, reverse=args.reverse)
+    mirrors = limit(mirrors, args.limit)
 
     if args.output:
         return dump_mirrors(mirrors, args.output)
