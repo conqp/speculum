@@ -26,6 +26,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 from json import load
 from logging import INFO, basicConfig, getLogger
+from os import linesep
 from pathlib import Path
 from re import error, compile, Pattern  # pylint: disable=W0622
 from sys import exit, stderr    # pylint: disable=W0622
@@ -141,7 +142,7 @@ def get_args() -> Namespace:
 def dump_mirrors(mirrors: Iterable[Mirror], path: Path) -> int:
     """Dumps the mirrors to the given path."""
 
-    mirrorlist = '\n'.join(mirror.mirrorlist_record for mirror in mirrors)
+    mirrorlist = linesep.join(mirror.mirrorlist_record for mirror in mirrors)
 
     try:
         with path.open('w') as file:
