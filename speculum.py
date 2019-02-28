@@ -28,7 +28,7 @@ from os import linesep
 from pathlib import Path
 from re import error, compile, Pattern  # pylint: disable=W0622
 from sys import exit, stderr    # pylint: disable=W0622
-from typing import Generator, Iterable
+from typing import Iterable
 from urllib.request import urlopen
 from urllib.parse import urlparse, ParseResult
 
@@ -93,7 +93,7 @@ def mirror_url(url: str) -> str:
     return parse_result.geturl()
 
 
-def get_mirrorlist(mirrors: DataFrame) -> Generator[str]:
+def get_mirrorlist(mirrors: DataFrame) -> Iterable[str]:
     """Returns a mirror list record."""
 
     for record in mirrors.itertuples():
@@ -246,7 +246,8 @@ def main() -> int:
         return list_countries(mirrors, reverse=args.reverse)
 
     mirrors = filter_mirrors(mirrors, args)
-    timediff = datetime.now() - to_datetime(mirrors.last_sync)
+    last_sync = to_datetime(mirrors.last_sync).dt.tz_convert(None)
+    timediff = datetime.now() - last_sync
     mirrors['age'] = timediff.dt.total_seconds() / 3600
 
     if args.sort:
