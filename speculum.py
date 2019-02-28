@@ -418,11 +418,11 @@ class Filter(NamedTuple):
                 return False
 
         if self.regex_incl is not None:
-            if not self.regex_incl.fullmatch(mirror.url.geturl()):
+            if not self.regex_incl.match(mirror.url.geturl()):
                 return False
 
         if self.regex_excl is not None:
-            if self.regex_excl.fullmatch(mirror.url.geturl()):
+            if self.regex_excl.match(mirror.url.geturl()):
                 return False
 
         return True
