@@ -287,7 +287,6 @@ class Mirror(NamedTuple):
         """Returns a mirror list record."""
         return f'Server = {self.mirrorlist_url.geturl()}'
 
-
     def get_sorting_key(self, options: Tuple[Sorting], now: datetime) -> Tuple:
         """Returns a tuple of the soring keys in the desired order."""
         if not options:
