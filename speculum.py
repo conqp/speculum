@@ -105,9 +105,9 @@ def list_countries(mirrors: DataFrame, reverse: bool = False) -> int:
 
     records = mirrors.itertuples()
     countries = map(lambda rec: (rec.country, rec.country_code), records)
-    countries = filter(lambda country: not country.empty, countries)
+    countries = filter(lambda country: country[0] and country[1], countries)
     countries = sorted(frozenset(countries), reverse=reverse)
-    iterprint(f'{country.name} ({country.code})' for country in countries)
+    iterprint(f'{name} ({code})' for name, code in countries)
     return 0
 
 
