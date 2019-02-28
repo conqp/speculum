@@ -48,12 +48,6 @@ def strings(string: str) -> filter:
     return filter(None, map(lambda s: s.strip().lower(), string.split(',')))
 
 
-def stringset(string: str) -> FrozenSet[str]:
-    """Returns a set of strings form a comma separated list."""
-
-    return frozenset(strings(string))
-
-
 def hours(string: str) -> timedelta:
     """Returns a timedelta of the respective
     amount of hours from a string.
@@ -69,14 +63,6 @@ def regex(string: str) -> Pattern:
         return compile(string)
     except error:
         raise ValueError(str(error))
-
-
-def sorting(string: str) -> Tuple[Sorting]:
-    """Returns a tuple of sorting options
-    from comma-separated string values.
-    """
-
-    return tuple(Sorting.from_string(string))
 
 
 def posint(string: str) -> int:
