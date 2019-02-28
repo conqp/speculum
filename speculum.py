@@ -82,7 +82,7 @@ def sorting(string: str) -> Tuple[Sorting]:
 def posint(string: str) -> int:
     """Returns a positive integer."""
 
-    integer = int(str)
+    integer = int(string)
 
     if integer > 0:
         return integer
