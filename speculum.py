@@ -166,25 +166,42 @@ def get_args() -> Namespace:
         '--list-countries', '-C', action='store_true',
         help='list the available countries')
     parser.add_argument(
-        '--sort', '-s', type=sorting, default=None, metavar='sorting',
+        '--sort', '-s', type=sorting, default=None,
+        metavar='<option>[,<option>...]',
         help='sort by the respective properties')
     parser.add_argument(
         '--reverse', '-r', action='store_true', help='sort in reversed order')
     parser.add_argument(
-        '--countries', '-c', type=stringset, default=None, metavar='countries',
+        '--countries', '-c', type=stringset, default=None,
+        metavar='<country>[,<country>...]',
         help='match mirrors of these countries')
     parser.add_argument(
-        '--protocols', '-p', type=stringset, default=None, metavar='protocols',
+        '--protocols', '-p', type=stringset, default=None,
+        metavar='<protocol>[,<protocol>...]',
         help='match mirrors that use one of the specified protocols')
     parser.add_argument(
-        '--max-age', '-a', type=hours, default=None, metavar='max_age',
+        '--max-age', '-a', type=hours, default=None, metavar='hours',
         help='match mirrors that use one of the specified protocols')
     parser.add_argument(
-        '--regex-incl', '-i', type=regex, default=None, metavar='regex_incl',
+        '--regex-match', '-m', type=regex, default=None, metavar='regex',
         help='match mirrors that match the regular expression')
     parser.add_argument(
-        '--regex-excl', '-x', type=regex, default=None, metavar='regex_excl',
+        '--regex-nomatch', '-n', type=regex, default=None, metavar='regex',
         help='exclude mirrors that match the regular expression')
+    parser.add_argument(
+        '--complete', '-t', action='store_true',
+        help='match mirrors that are completely synced')
+    parser.add_argument(
+        '--active', '-u', action='store_true', help='match active mirrors')
+    parser.add_argument(
+        '--ipv4', '-4', action='store_true',
+        help='match mirrors that support IPv4')
+    parser.add_argument(
+        '--ipv6', '-6', action='store_true',
+        help='match mirrors that support IPv6')
+    parser.add_argument(
+        '--isos', '-i', action='store_true',
+        help='match mirrors that host ISOs')
     parser.add_argument(
         '--limit', '-l', type=posint, default=None, metavar='file',
         help='limit output to this amount of results')
@@ -393,17 +410,23 @@ class Filter(NamedTuple):
     countries: FrozenSet[str]
     protocols: FrozenSet[str]
     max_age: timedelta
-    regex_incl: Pattern
-    regex_excl: Pattern
+    regex_match: Pattern
+    regex_nomatch: Pattern
+    complete: bool
+    active: bool
+    ipv4: bool
+    ipv6: bool
+    isos: bool
 
     @classmethod
     def from_args(cls, args):
         """Returns a filter instance from the respective CLI arguments."""
         return cls(
-            args.countries, args.protocols, args.max_age, args.regex_incl,
-            args.regex_excl)
+            args.countries, args.protocols, args.max_age, args.regex_match,
+            args.regex_nomatch, args.complete, args.active, args.ipv4,
+            args.ipv6, args.isos)
 
-    def match(self, mirror: Mirror) -> bool:
+    def match(self, mirror: Mirror) -> bool:    # pylint: disable=R0911,R0912
         """Matches the mirror."""
         if self.countries is not None:
             if not any(mirror.country.match(c) for c in self.countries):
@@ -417,12 +440,32 @@ class Filter(NamedTuple):
             if mirror.last_sync + self.max_age < datetime.now():
                 return False
 
-        if self.regex_incl is not None:
-            if not self.regex_incl.match(mirror.url.geturl()):
+        if self.regex_match is not None:
+            if not self.regex_match.match(mirror.url.geturl()):
                 return False
 
-        if self.regex_excl is not None:
-            if self.regex_excl.match(mirror.url.geturl()):
+        if self.regex_nomatch is not None:
+            if self.regex_nomatch.match(mirror.url.geturl()):
+                return False
+
+        if self.complete is not None:
+            if mirror.completion < 1:
+                return False
+
+        if self.active:
+            if not mirror.active:
+                return False
+
+        if self.ipv4:
+            if not mirror.ipv4:
+                return False
+
+        if self.ipv6:
+            if not mirror.ipv6:
+                return False
+
+        if self.isos:
+            if not mirror.isos:
                 return False
 
         return True
