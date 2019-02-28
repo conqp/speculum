@@ -239,7 +239,6 @@ def main() -> int:
     if args.list_countries:
         return list_countries(mirrors, reverse=args.reverse)
 
-    mirrors = filter_mirrors(mirrors, args)
     last_sync = to_datetime(mirrors.last_sync).dt.tz_convert(None)
     timediff = datetime.now() - last_sync
     mirrors['age'] = timediff.dt.total_seconds() / 3600
@@ -248,6 +247,8 @@ def main() -> int:
     if args.list_sortopts:
         iterprint(sorted(columns, reverse=args.reverse))
         return 0
+
+    mirrors = filter_mirrors(mirrors, args)
 
     if args.sort:
         mirrors = mirrors.sort_values(args.sort, ascending=not args.reverse)
