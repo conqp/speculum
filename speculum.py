@@ -88,9 +88,11 @@ def get_sorting_key(sorting):
 def limit(mirrors, limit):  # pylint: disable=W0621
     """Limit the amount of mirrors."""
 
-    for count, mirror in enumerate(mirrors):
-        if limit is None or count < limit:
-            yield mirror
+    for count, mirror in enumerate(mirrors, start=1):
+        if limit is not None and count > limit:
+            break
+
+        yield mirror
 
 
 def get_args():
