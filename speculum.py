@@ -52,6 +52,14 @@ def stringtuple(string):
     return tuple(strings(string))
 
 
+def hours(string):
+    """Returns a timedelta of the respective
+    amount of hours from a string.
+    """
+
+    return timedelta(hours=int(string))
+
+
 def get_json():
     """Returns the mirrors from the respective URL."""
 
@@ -102,8 +110,7 @@ def get_args():
         metavar='protocols',
         help='match mirrors that use one of the specified protocols')
     parser.add_argument(
-        '--max-age', '-a', type=lambda age: timedelta(hours=int(age)),
-        default=None, metavar='max_age',
+        '--max-age', '-a', type=hours, default=None, metavar='max_age',
         help='match mirrors that use one of the specified protocols')
     parser.add_argument(
         '--regex-incl', '-i', type=compile, default=None,
