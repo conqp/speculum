@@ -426,49 +426,36 @@ class Filter(NamedTuple):
             args.regex_nomatch, args.complete, args.active, args.ipv4,
             args.ipv6, args.isos)
 
-    def match(self, mirror: Mirror) -> bool:    # pylint: disable=R0911,R0912
-        """Matches the mirror."""
+    def match_fails(self, mirror: Mirror) -> bool:
+        """Yields True on failed matches."""
+        # Boolean tests first.
+        yield self.active and not mirror.active
+        yield self.ipv4 and not mirror.ipv4
+        yield self.ipv6 and not mirror.ipv6
+        yield self.isos and not mirror.isos
+
+        # Other, slower checks.
+        if self.complete is not None:
+            yield mirror.completion < 1
+
         if self.countries is not None:
-            if not any(mirror.country.match(c) for c in self.countries):
-                return False
+            yield not any(mirror.country.match(c) for c in self.countries)
 
         if self.protocols is not None:
-            if mirror.url.scheme.lower() not in self.protocols:
-                return False
+            yield mirror.url.scheme.lower() not in self.protocols
 
         if self.max_age is not None:
-            if mirror.last_sync + self.max_age < datetime.now():
-                return False
+            yield mirror.last_sync + self.max_age < datetime.now()
 
         if self.regex_match is not None:
-            if not self.regex_match.match(mirror.url.geturl()):
-                return False
+            yield self.regex_match.match(mirror.url.geturl())
 
         if self.regex_nomatch is not None:
-            if self.regex_nomatch.match(mirror.url.geturl()):
-                return False
+            yield self.regex_nomatch.match(mirror.url.geturl())
 
-        if self.complete is not None:
-            if mirror.completion < 1:
-                return False
-
-        if self.active:
-            if not mirror.active:
-                return False
-
-        if self.ipv4:
-            if not mirror.ipv4:
-                return False
-
-        if self.ipv6:
-            if not mirror.ipv6:
-                return False
-
-        if self.isos:
-            if not mirror.isos:
-                return False
-
-        return True
+    def match(self, mirror: Mirror) -> bool:
+        """Matches the mirror."""
+        return not any(self.match_fails(mirror))
 
 
 if __name__ == '__main__':
