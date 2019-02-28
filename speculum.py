@@ -251,7 +251,12 @@ def main() -> int:
     mirrors = filter_mirrors(mirrors, args)
 
     if args.sort:
-        mirrors = mirrors.sort_values(args.sort, ascending=not args.reverse)
+        try:
+            mirrors = mirrors.sort_values(
+                args.sort, ascending=not args.reverse)
+        except KeyError as key:
+            LOGGER.error(f'Cannot sort by key {key}.')
+            return 1
 
     if args.limit:
         mirrors = mirrors.head(args.limit)
