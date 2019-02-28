@@ -45,8 +45,8 @@ def regex(string: str) -> Pattern:
 
     try:
         return compile(string)
-    except error:
-        raise ValueError(str(error))
+    except error as err:
+        raise ValueError(str(err))
 
 
 def posint(string: str) -> int:
