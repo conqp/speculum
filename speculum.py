@@ -365,4 +365,8 @@ class Filter(NamedTuple):
 
 
 if __name__ == '__main__':
-    exit(main())
+    try:
+        exit(main())
+    except KeyboardInterrupt:
+        LOGGER.error('Aborted by user.')
+        exit(1)
