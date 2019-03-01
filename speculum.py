@@ -28,7 +28,7 @@ from pathlib import Path
 from re import error, compile, Pattern  # pylint: disable=W0622
 from sys import exit, stderr    # pylint: disable=W0622
 from typing import Iterable
-from urllib.parse import urlparse, ParseResult
+from urllib.parse import urljoin
 
 from pandas import to_datetime, DataFrame
 from requests import get
@@ -60,7 +60,7 @@ def posint(string: str) -> int:
     raise ValueError('Integer must be greater than zero.')
 
 
-def get_mirrors(url=MIRRORS_URL) -> dict:
+def get_mirrors(url: str = MIRRORS_URL) -> dict:
     """Returns the mirrors from the respective URL."""
 
     return DataFrame(get(url).json()['urls'])
@@ -80,14 +80,10 @@ def iterprint(items: Iterable[str]):
 def mirror_url(url: str) -> str:
     """Returns a mirror list URL."""
 
-    scheme, netloc, path, params, query, fragment = urlparse(url)
+    if not url.endswith('/'):
+        url += '/'
 
-    if not path.endswith('/'):
-        path += '/'
-
-    parse_result = ParseResult(
-        scheme, netloc, path + REPO_PATH, params, query, fragment)
-    return parse_result.geturl()
+    return urljoin(url, REPO_PATH)
 
 
 def get_mirrorlist(mirrors: DataFrame) -> Iterable[str]:
