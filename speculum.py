@@ -216,13 +216,6 @@ def dump_mirrors(mirrors: DataFrame, path: Path) -> int:
     return 0
 
 
-def print_mirrors(mirrors: DataFrame) -> int:
-    """Prints the mirrors to STDOUT."""
-
-    iterprint(get_mirrorlist(mirrors))
-    return 0
-
-
 def main() -> int:
     """Filters and sorts the mirrors."""
 
@@ -265,7 +258,8 @@ def main() -> int:
     if args.output:
         return dump_mirrors(mirrors, args.output)
 
-    return print_mirrors(mirrors)
+    iterprint(get_mirrorlist(mirrors))
+    return 0
 
 
 if __name__ == '__main__':
