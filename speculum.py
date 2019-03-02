@@ -313,14 +313,15 @@ def main() -> int:
 
     basicConfig(level=INFO, format=LOG_FORMAT)
     args = get_args()
+
+    if args.list_sortopts:
+        iterprint(sorted(SORTING_DEFAULTS.keys(), reverse=args.reverse))
+        return 0
+
     mirrors = get_mirrors()
 
     if args.list_countries:
         return list_countries(mirrors, reverse=args.reverse)
-
-    if args.list_sortopts:
-        iterprint(sorted(mirrors.keys(), reverse=args.reverse))
-        return 0
 
     mirrors = filter(partial(match, args), mirrors)
 
