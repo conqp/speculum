@@ -24,7 +24,7 @@ from argparse import ArgumentParser, Namespace
 from datetime import datetime, timedelta
 from functools import partial
 from json import load
-from logging import DEBUG, INFO, basicConfig, getLogger
+from logging import DEBUG, WARNING, basicConfig, getLogger
 from os import linesep
 from pathlib import Path
 from re import error, compile, Pattern  # pylint: disable=W0622
@@ -329,7 +329,7 @@ def main() -> int:
     """Filters and sorts the mirrors."""
 
     args = get_args()
-    basicConfig(level=DEBUG if args.verbose else INFO, format=LOG_FORMAT)
+    basicConfig(level=DEBUG if args.verbose else WARNING, format=LOG_FORMAT)
 
     if args.list_sortopts:
         iterprint(sorted(SORTING_DEFAULTS.keys(), reverse=args.reverse))
@@ -341,6 +341,8 @@ def main() -> int:
         LOGGER.error('Could not download mirror list.')
         LOGGER.debug(err)
         return 1
+
+    LOGGER.info('Received %i mirrors.', len(mirrors))
 
     if args.list_countries:
         return list_countries(mirrors, reverse=args.reverse)
