@@ -38,7 +38,7 @@ from urllib.request import urlopen
 MIRRORS_URL = 'https://www.archlinux.org/mirrors/status/json/'
 REPO_PATH = '$repo/os/$arch'
 SORTING_DEFAULTS = {
-    'url': None,
+    'url': '',
     'protocol': '~',
     'last_sync': '~',
     'completion_pct': 0,
@@ -47,7 +47,9 @@ SORTING_DEFAULTS = {
     'duration_stddev': float('inf'),
     'score': float('inf'),
     'country': '~',
-    'country_code': '~'}
+    'country_code': '~',
+    'age': None
+}
 LOG_FORMAT = '[%(levelname)s] %(name)s: %(message)s'
 LOGGER = getLogger(__file__)
 
@@ -102,7 +104,7 @@ def set_ages(mirrors: list) -> list:
         else:
             last_sync = datetime.fromtimestamp(0)
 
-        mirror['age'] = now -last_sync
+        mirror['age'] = now - last_sync
 
     return mirrors
 
@@ -117,7 +119,9 @@ def get_mirrors(url: str = MIRRORS_URL) -> list:
 
 
 def iterprint(items: Iterable[str]):
-    """Prints the items one by one, catching BrokenPipeErrors."""
+    """Prints the items one by one, catching BrokenPipeErrors so
+    that output can be handled by head, tail or similar programs.
+    """
 
     for item in items:
         try:
@@ -140,7 +144,13 @@ def get_mirrorlist(mirrors: Iterable[dict]) -> Iterable[str]:
     """Returns a mirror list record."""
 
     for mirror in mirrors:
-        url = mirror_url(mirror['url'])
+        url = mirror['url']
+
+        if not url:
+            LOGGER.warning('Skipping mirror without URL.')
+            continue
+
+        url = mirror_url(url)
         yield f'Server = {url}'
 
 
@@ -286,6 +296,9 @@ def get_args() -> Namespace:
     parser.add_argument(
         '-o', '--output', type=Path, metavar='file',
         help='write the output to the specified file instead of stdout')
+    parser.add_argument(
+        '--url', default=MIRRORS_URL, metavar='url',
+        help='use this URL to retrieve mirrors')
     args = parser.parse_args()
 
     if args.list_sortopts and args.list_countries:
@@ -320,7 +333,7 @@ def main() -> int:
         return 0
 
     try:
-        mirrors = get_mirrors()
+        mirrors = get_mirrors(url=args.url)
     except URLError as url_error:
         LOGGER.error('Could not download mirror list: %s', url_error)
         return 1
