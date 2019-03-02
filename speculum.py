@@ -88,36 +88,6 @@ def parse_datetime(string: str) -> datetime:
     return dtime.replace(tzinfo=None)
 
 
-def get_sorting_key(sorting: Iterable[str]) -> Callable:
-    """Returns a sorting key function for the given sorting options."""
-
-    warned = set()
-
-    def _get_sorting_key(mirror: dict) -> tuple:
-        """Returns a sorting key for mirror from the given sorting options."""
-
-        key = []
-
-        for option in sorting:
-            try:
-                default = SORTING_DEFAULTS[option]
-            except KeyError:
-                if option not in warned:
-                    LOGGER.warning(
-                        'Ignoring invalid sorting key "%s".', option)
-                    warned.add(option)
-
-                continue
-
-            value = mirror.get(option)
-            value = default if value is None else value
-            key.append(value)
-
-        return tuple(key)
-
-    return _get_sorting_key
-
-
 def set_ages(mirrors: list) -> list:
     """Sets ages on mirrors."""
 
@@ -223,6 +193,36 @@ def match(args: Namespace, mirror: dict) -> bool:   # pylint: disable=R0911
         return False
 
     return True
+
+
+def get_sorting_key(sorting: Iterable[str]) -> Callable:
+    """Returns a sorting key function for the given sorting options."""
+
+    warned = set()
+
+    def _get_sorting_key(mirror: dict) -> tuple:
+        """Returns a sorting key for mirror from the given sorting options."""
+
+        key = []
+
+        for option in sorting:
+            try:
+                default = SORTING_DEFAULTS[option]
+            except KeyError:
+                if option not in warned:
+                    LOGGER.warning(
+                        'Ignoring invalid sorting key "%s".', option)
+                    warned.add(option)
+
+                continue
+
+            value = mirror.get(option)
+            value = default if value is None else value
+            key.append(value)
+
+        return tuple(key)
+
+    return _get_sorting_key
 
 
 def limit(mirrors: Iterable[dict], maximum: int) -> Iterable[dict]:
