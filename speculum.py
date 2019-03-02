@@ -77,6 +77,17 @@ def hours(string: str) -> timedelta:
     return timedelta(hours=int(string))
 
 
+def parse_datetime(string: str) -> datetime:
+    """Parses a mirror's last_sync datetime stamp."""
+
+    try:
+        dtime = datetime.strptime(string, '%Y-%m-%dT%H:%M:%S.%fZ')
+    except ValueError:
+        dtime = datetime.strptime(string, '%Y-%m-%dT%H:%M:%SZ')
+
+    return dtime.replace(tzinfo=None)
+
+
 def get_sorting_key(sorting: Iterable[str], mirror: dict) -> Tuple:
     """Returns a sorting kry for mirror from the given sorting options."""
 
@@ -84,7 +95,7 @@ def get_sorting_key(sorting: Iterable[str], mirror: dict) -> Tuple:
 
     for option in sorting:
         try:
-            default = SORTING_DEFAULTS['option']
+            default = SORTING_DEFAULTS[option]
         except KeyError:
             LOGGER.warning('Ignoring invalid sorting key "%s".', option)
             continue
@@ -93,7 +104,7 @@ def get_sorting_key(sorting: Iterable[str], mirror: dict) -> Tuple:
         value = default if value is None else value
         key.append(value)
 
-    return tuple(value)
+    return tuple(key)
 
 
 def set_ages(mirrors: list) -> list:
@@ -105,8 +116,7 @@ def set_ages(mirrors: list) -> list:
         last_sync = mirror.get('last_sync')
 
         if last_sync:
-            last_sync = datetime.strptime(last_sync, '%Y-%m-%dT%H:%M:%S.%fZ')
-            last_sync = last_sync.replace(tzinfo=None)
+            last_sync = parse_datetime(last_sync)
         else:
             last_sync = datetime.fromtimestamp(0)
 
@@ -144,7 +154,7 @@ def mirror_url(url: str) -> str:
     return urljoin(url, REPO_PATH)
 
 
-def get_mirrorlist(mirrors: list) -> Iterable[str]:
+def get_mirrorlist(mirrors: Iterable[dict]) -> Iterable[str]:
     """Returns a mirror list record."""
 
     for mirror in mirrors:
@@ -152,7 +162,7 @@ def get_mirrorlist(mirrors: list) -> Iterable[str]:
         yield f'Server = {url}'
 
 
-def list_countries(mirrors: list, reverse: bool = False) -> int:
+def list_countries(mirrors: Iterable[dict], reverse: bool = False) -> int:
     """Lists available countries."""
 
     countries = ((mirr['country'], mirr['country_code']) for mirr in mirrors)
@@ -204,6 +214,16 @@ def match(args: Namespace, mirror: dict) -> bool:   # pylint: disable=R0911
     return True
 
 
+def limit(mirrors: Iterable[dict], maximum: int) -> Iterable[dict]:
+    """Yields mirrors up to the specified maximum."""
+
+    for count, mirror in enumerate(mirrors, start=1):
+        if maximum is not None and count > maximum:
+            break
+
+        yield mirror
+
+
 def get_args() -> Namespace:
     """Returns the parsed arguments."""
 
@@ -229,10 +249,10 @@ def get_args() -> Namespace:
         '-a', '--max-age', type=hours, metavar='hours',
         help='match mirrors that use one of the specified protocols')
     parser.add_argument(
-        '-m', '--regex-match', type=regex, metavar='regex',
+        '-m', '--match', type=regex, metavar='regex',
         help='match mirrors that match the regular expression')
     parser.add_argument(
-        '-n', '--regex-nomatch', type=regex, metavar='regex',
+        '-n', '--nomatch', type=regex, metavar='regex',
         help='exclude mirrors that match the regular expression')
     parser.add_argument(
         '-t', '--complete', action='store_true',
@@ -298,9 +318,11 @@ def main() -> int:
         mirrors = sorted(mirrors, key=key, reverse=args.reverse)
 
     if args.limit:
-        mirrors = mirrors.head(args.limit)
+        mirrors = limit(mirrors, args.limit)
 
-    if not mirrors.size and args.limit != 0:
+    mirrors = tuple(mirrors)
+
+    if not mirrors and args.limit != 0:
         LOGGER.error('No mirrors found.')
         return 1
 
