@@ -30,6 +30,7 @@ from pathlib import Path
 from re import error, compile, Pattern  # pylint: disable=W0622
 from sys import exit, stderr    # pylint: disable=W0622
 from typing import Callable, Iterable
+from urllib.error import URLError
 from urllib.parse import urljoin
 from urllib.request import urlopen
 
@@ -318,7 +319,11 @@ def main() -> int:
         iterprint(sorted(SORTING_DEFAULTS.keys(), reverse=args.reverse))
         return 0
 
-    mirrors = get_mirrors()
+    try:
+        mirrors = get_mirrors()
+    except URLError as url_error:
+        LOGGER.error('Could not download mirror list: %s', url_error)
+        return 1
 
     if args.list_countries:
         return list_countries(mirrors, reverse=args.reverse)
