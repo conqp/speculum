@@ -29,7 +29,7 @@ from os import linesep
 from pathlib import Path
 from re import error, compile, Pattern  # pylint: disable=W0622
 from sys import exit, stderr    # pylint: disable=W0622
-from typing import Iterable, Tuple
+from typing import Callable, Iterable, Tuple
 from urllib.parse import urljoin
 from urllib.request import urlopen
 
@@ -88,23 +88,34 @@ def parse_datetime(string: str) -> datetime:
     return dtime.replace(tzinfo=None)
 
 
-def get_sorting_key(sorting: Iterable[str], mirror: dict) -> Tuple:
-    """Returns a sorting kry for mirror from the given sorting options."""
+def get_sorting_key(sorting: Iterable[str]) -> Callable:
+    """Returns a sorting key function for the given sorting options."""
 
-    key = []
+    warned = set()
 
-    for option in sorting:
-        try:
-            default = SORTING_DEFAULTS[option]
-        except KeyError:
-            LOGGER.warning('Ignoring invalid sorting key "%s".', option)
-            continue
+    def _get_sorting_key(mirror: dict) -> tuple:
+        """Returns a sorting key for mirror from the given sorting options."""
 
-        value = mirror.get(option)
-        value = default if value is None else value
-        key.append(value)
+        key = []
 
-    return tuple(key)
+        for option in sorting:
+            try:
+                default = SORTING_DEFAULTS[option]
+            except KeyError:
+                if option not in warned:
+                    LOGGER.warning(
+                        'Ignoring invalid sorting key "%s".', option)
+                    warned.add(option)
+
+                continue
+
+            value = mirror.get(option)
+            value = default if value is None else value
+            key.append(value)
+
+        return tuple(key)
+
+    return _get_sorting_key
 
 
 def set_ages(mirrors: list) -> list:
@@ -314,7 +325,7 @@ def main() -> int:
     mirrors = filter(partial(match, args), mirrors)
 
     if args.sort:
-        key = partial(get_sorting_key, args.sort)
+        key = get_sorting_key(args.sort)
         mirrors = sorted(mirrors, key=key, reverse=args.reverse)
 
     if args.limit:
