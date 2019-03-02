@@ -29,7 +29,7 @@ from os import linesep
 from pathlib import Path
 from re import error, compile, Pattern  # pylint: disable=W0622
 from sys import exit, stderr    # pylint: disable=W0622
-from typing import Callable, Iterable, Tuple
+from typing import Callable, Iterable
 from urllib.parse import urljoin
 from urllib.request import urlopen
 
