@@ -24,7 +24,7 @@ from argparse import ArgumentParser, Namespace
 from datetime import datetime, timedelta
 from functools import partial
 from json import load
-from logging import INFO, basicConfig, getLogger
+from logging import DEBUG, INFO, basicConfig, getLogger
 from os import linesep
 from pathlib import Path
 from re import error, compile, Pattern  # pylint: disable=W0622
@@ -251,6 +251,9 @@ def get_args() -> Namespace:
 
     parser = ArgumentParser(description=__doc__)
     parser.add_argument(
+        '-v', '--verbose', action='store_true',
+        help='enable more detailed logging')
+    parser.add_argument(
         '-S', '--list-sortopts', action='store_true',
         help='list the available sorting options')
     parser.add_argument(
@@ -325,8 +328,8 @@ def dump_mirrors(mirrors: list, path: Path) -> int:
 def main() -> int:
     """Filters and sorts the mirrors."""
 
-    basicConfig(level=INFO, format=LOG_FORMAT)
     args = get_args()
+    basicConfig(level=DEBUG if args.verbose else INFO, format=LOG_FORMAT)
 
     if args.list_sortopts:
         iterprint(sorted(SORTING_DEFAULTS.keys(), reverse=args.reverse))
@@ -334,8 +337,9 @@ def main() -> int:
 
     try:
         mirrors = get_mirrors(url=args.url)
-    except URLError as url_error:
-        LOGGER.error('Could not download mirror list: %s', url_error)
+    except (ValueError, URLError) as err:
+        LOGGER.error('Could not download mirror list.')
+        LOGGER.debug(err)
         return 1
 
     if args.list_countries:
