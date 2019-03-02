@@ -48,8 +48,7 @@ SORTING_DEFAULTS = {
     'score': float('inf'),
     'country': '~',
     'country_code': '~',
-    'age': None
-}
+    'age': None}
 LOG_FORMAT = '[%(levelname)s] %(name)s: %(message)s'
 LOGGER = getLogger(__file__)
 
