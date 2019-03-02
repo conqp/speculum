@@ -190,7 +190,7 @@ def match(args: Namespace, mirror: dict) -> bool:   # pylint: disable=R0911
     if args.max_age is not None and mirror['age'] > args.max_age:
         return False
 
-    if args.match is not None and not args.match.march(mirror['url']):
+    if args.match is not None and not args.match.match(mirror['url']):
         return False
 
     if args.nomatch is not None and args.nomatch.match(mirror['url']):
