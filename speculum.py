@@ -21,21 +21,32 @@
 """Yet another Arch Linux mirrorlist optimizer."""
 
 from argparse import ArgumentParser, Namespace
-from datetime import datetime
+from datetime import datetime, timedelta
+from functools import partial
+from json import load
 from logging import INFO, basicConfig, getLogger
 from os import linesep
 from pathlib import Path
 from re import error, compile, Pattern  # pylint: disable=W0622
 from sys import exit, stderr    # pylint: disable=W0622
-from typing import Iterable
+from typing import Iterable, Tuple
 from urllib.parse import urlparse, ParseResult
-
-from pandas import to_datetime, DataFrame
-from requests import get
+from urllib.request import urlopen
 
 
 MIRRORS_URL = 'https://www.archlinux.org/mirrors/status/json/'
 REPO_PATH = '$repo/os/$arch'
+SORTING_DEFAULTS = {
+    'url': None,
+    'protocol': '~',
+    'last_sync': '~',
+    'completion_pct': 0,
+    'delay': float('inf'),
+    'duration_avg': float('inf'),
+    'duration_stddev': float('inf'),
+    'score': float('inf'),
+    'country': '~',
+    'country_code': '~'}
 LOG_FORMAT = '[%(levelname)s] %(name)s: %(message)s'
 LOGGER = getLogger(__file__)
 
@@ -60,10 +71,57 @@ def posint(string: str) -> int:
     raise ValueError('Integer must be greater than zero.')
 
 
-def get_mirrors(url=MIRRORS_URL) -> dict:
+def hours(string: str) -> timedelta:
+    """Returns a time delta for the given hours."""
+
+    return timedelta(hours=int(string))
+
+
+def get_sorting_key(sorting: Iterable[str], mirror: dict) -> Tuple:
+    """Returns a sorting kry for mirror from the given sorting options."""
+
+    key = []
+
+    for option in sorting:
+        try:
+            default = SORTING_DEFAULTS['option']
+        except KeyError:
+            LOGGER.warning('Ignoring invalid sorting key "%s".', option)
+            continue
+
+        value = mirror.get(option)
+        value = default if value is None else value
+        key.append(value)
+
+    return tuple(value)
+
+
+def set_ages(mirrors: list) -> list:
+    """Sets ages on mirrors."""
+
+    now = datetime.now()
+
+    for mirror in mirrors:
+        last_sync = mirror.get('last_sync')
+
+        if last_sync:
+            last_sync = datetime.strptime(last_sync, '%Y-%m-%dT%H:%M:%S.%fZ')
+            last_sync = last_sync.replace(tzinfo=None)
+        else:
+            last_sync = datetime.fromtimestamp(0)
+
+        mirror['age'] = now -last_sync
+
+    return mirrors
+
+
+def get_mirrors(url: str = MIRRORS_URL) -> list:
     """Returns the mirrors from the respective URL."""
 
-    return DataFrame(get(url).json()['urls'])
+    with urlopen(url) as response:
+        json = load(response)
+
+    return set_ages(json['urls'])
 
 
 def iterprint(items: Iterable[str]):
@@ -90,61 +148,64 @@ def mirror_url(url: str) -> str:
     return parse_result.geturl()
 
 
-def get_mirrorlist(mirrors: DataFrame) -> Iterable[str]:
+def get_mirrorlist(mirrors: list) -> Iterable[str]:
     """Returns a mirror list record."""
 
-    for record in mirrors.itertuples():
-        url = mirror_url(record.url)
+    for mirror in mirrors:
+        url = mirror_url(mirror['url'])
         yield f'Server = {url}'
 
 
-def list_countries(mirrors: DataFrame, reverse: bool = False) -> int:
+def list_countries(mirrors: list, reverse: bool = False) -> int:
     """Lists available countries."""
 
-    records = mirrors.itertuples()
-    countries = map(lambda rec: (rec.country, rec.country_code), records)
+    countries = ((mirr['country'], mirr['country_code']) for mirr in mirrors)
     countries = filter(lambda country: country[0] and country[1], countries)
     countries = sorted(frozenset(countries), reverse=reverse)
     iterprint(f'{name} ({code})' for name, code in countries)
     return 0
 
 
-def filter_mirrors(mirrors: DataFrame, args: Namespace) -> DataFrame:
+def match(args: Namespace, mirror: dict) -> bool:   # pylint: disable=R0911
     """Filters the respective mirrors."""
 
     if args.countries is not None:
-        mirrors = mirrors[
-            mirrors.country.str.lower().isin(args.countries)
-            | mirrors.country_code.str.lower().isin(args.countries)]
+        country = mirror.get('country')
+        match_country = country and country.lower() in args.countries
+        country_code = mirror.get('country_code')
+        match_code = country_code and country_code.lower() in args.countries
 
-    if args.protocols is not None:
-        mirrors = mirrors[mirrors.protocol.isin(args.protocols)]
+        if not match_country and not match_code:
+            return False
 
-    if args.max_age is not None:
-        mirrors = mirrors[mirrors.age <= args.max_age]
+    if args.protocols is not None and not mirror['protocol'] in args.protocols:
+        return False
 
-    if args.regex_match is not None:
-        mirrors = mirrors[mirrors.url.str.match(args.regex_match)]
+    if args.max_age is not None and mirror['age'] > args.max_age:
+        return False
 
-    if args.regex_nomatch is not None:
-        mirrors = mirrors[~mirrors.url.str.match(args.regex_nomatch)]
+    if args.match is not None and not args.match.march(mirror['url']):
+        return False
 
-    if args.complete:
-        mirrors = mirrors[mirrors.completion_pct == 1]
+    if args.nomatch is not None and args.nomatch.match(mirror['url']):
+        return False
 
-    if args.active:
-        mirrors = mirrors[mirrors.active]
+    if args.complete and mirror.get('completion_pct', 0) < 1:
+        return False
 
-    if args.ipv4:
-        mirrors = mirrors[mirrors.ipv4]
+    if args.active and not mirror.get('active'):
+        return False
 
-    if args.ipv6:
-        mirrors = mirrors[mirrors.ipv6]
+    if args.ipv4 and not mirror.get('ipv4'):
+        return False
 
-    if args.isos:
-        mirrors = mirrors[mirrors.isos]
+    if args.ipv6 and not mirror.get('ipv6'):
+        return False
 
-    return mirrors
+    if args.isos and not mirror.get('isos'):
+        return False
+
+    return True
 
 
 def get_args() -> Namespace:
@@ -169,7 +230,7 @@ def get_args() -> Namespace:
         '-p', '--protocols', nargs='+', metavar='<protocol>',
         help='match mirrors that use one of the specified protocols')
     parser.add_argument(
-        '-a', '--max-age', type=posint, metavar='hours',
+        '-a', '--max-age', type=hours, metavar='hours',
         help='match mirrors that use one of the specified protocols')
     parser.add_argument(
         '-m', '--regex-match', type=regex, metavar='regex',
@@ -205,7 +266,7 @@ def get_args() -> Namespace:
     return args
 
 
-def dump_mirrors(mirrors: DataFrame, path: Path) -> int:
+def dump_mirrors(mirrors: list, path: Path) -> int:
     """Dumps the mirrors to the given path."""
 
     mirrorlist = linesep.join(get_mirrorlist(mirrors))
@@ -220,13 +281,6 @@ def dump_mirrors(mirrors: DataFrame, path: Path) -> int:
     return 0
 
 
-def print_mirrors(mirrors: DataFrame) -> int:
-    """Prints the mirrors to STDOUT."""
-
-    iterprint(get_mirrorlist(mirrors))
-    return 0
-
-
 def main() -> int:
     """Filters and sorts the mirrors."""
 
@@ -237,24 +291,15 @@ def main() -> int:
     if args.list_countries:
         return list_countries(mirrors, reverse=args.reverse)
 
-    last_sync = to_datetime(mirrors.last_sync).dt.tz_convert(None)
-    timediff = datetime.now() - last_sync
-    mirrors['age'] = timediff.dt.total_seconds() / 3600
-    columns = mirrors.columns.values
-
     if args.list_sortopts:
-        iterprint(sorted(columns, reverse=args.reverse))
+        iterprint(sorted(mirrors.keys(), reverse=args.reverse))
         return 0
 
-    mirrors = filter_mirrors(mirrors, args)
+    mirrors = filter(partial(match, args), mirrors)
 
     if args.sort:
-        try:
-            mirrors = mirrors.sort_values(
-                args.sort, ascending=not args.reverse)
-        except KeyError as key:
-            LOGGER.error('Cannot sort by key %s.', key)
-            return 1
+        key = partial(get_sorting_key, args.sort)
+        mirrors = sorted(mirrors, key=key, reverse=args.reverse)
 
     if args.limit:
         mirrors = mirrors.head(args.limit)
@@ -269,7 +314,8 @@ def main() -> int:
     if args.output:
         return dump_mirrors(mirrors, args.output)
 
-    return print_mirrors(mirrors)
+    iterprint(get_mirrorlist(mirrors))
+    return 0
 
 
 if __name__ == '__main__':
