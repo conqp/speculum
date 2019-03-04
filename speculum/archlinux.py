@@ -56,10 +56,10 @@ def set_ages(mirrors: list) -> list:
     return mirrors
 
 
-def get_mirrors(url: str = MIRRORS_URL) -> list:
+def get_mirrors() -> list:
     """Returns the mirrors from the respective URL."""
 
-    with urlopen(url) as response:
+    with urlopen(MIRRORS_URL) as response:
         json = load(response)
 
     return set_ages(json['urls'])
@@ -121,7 +121,7 @@ def main(args) -> int:
         return 0
 
     try:
-        mirrors = get_mirrors(url=args.url)
+        mirrors = get_mirrors()
     except (ValueError, URLError) as err:
         LOGGER.error('Could not download mirror list.')
         LOGGER.debug(err)
