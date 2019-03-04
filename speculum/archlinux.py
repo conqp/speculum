@@ -3,7 +3,6 @@
 from datetime import datetime
 from functools import partial
 from json import load
-from logging import DEBUG, WARNING, basicConfig
 from os import linesep
 from pathlib import Path
 from typing import Iterable
@@ -11,11 +10,10 @@ from urllib.error import URLError
 from urllib.parse import urljoin
 from urllib.request import urlopen
 
-from speculum.argparse import parse_args
 from speculum.cli import iterprint
 from speculum.filtering import match
 from speculum.limiting import limit
-from speculum.logging import LOGGER, LOG_FORMAT
+from speculum.logging import LOGGER
 from speculum.parsers import parse_datetime
 from speculum.sorting import get_sorting_key
 
@@ -115,11 +113,8 @@ def dump_mirrors(mirrors: list, path: Path) -> int:
     return 0
 
 
-def main() -> int:
+def main(args) -> int:
     """Filters and sorts the mirrors."""
-
-    args = parse_args()
-    basicConfig(level=DEBUG if args.verbose else WARNING, format=LOG_FORMAT)
 
     if args.list_sortopts:
         iterprint(sorted(SORTING_DEFAULTS.keys(), reverse=args.reverse))

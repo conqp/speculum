@@ -31,7 +31,9 @@ def main():
         exit(2)
 
     try:
-        exit(main_func())
+        exit_code = main_func(args)
     except KeyboardInterrupt:
         LOGGER.error('Aborted by user.')
         exit(1)
+
+    exit(exit_code)
