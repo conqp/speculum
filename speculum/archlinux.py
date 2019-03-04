@@ -7,7 +7,7 @@ from os import linesep
 from pathlib import Path
 from typing import Iterable
 from urllib.error import URLError
-from urllib.parse import urljoin
+from urllib.parse import urlparse, ParseResult
 from urllib.request import urlopen
 
 from speculum.cli import iterprint
@@ -68,10 +68,14 @@ def get_mirrors() -> list:
 def mirror_url(url: str) -> str:
     """Returns a mirror list URL."""
 
-    if not url.endswith('/'):
-        url += '/'
+    scheme, netloc, path, params, query, fragment = urlparse(url)
 
-    return urljoin(url, REPO_PATH)
+    if not path.endswith('/'):
+        path += '/'
+
+    path += REPO_PATH
+    url = ParseResult(scheme, netloc, path, params, query, fragment)
+    return url.geturl()
 
 
 def get_mirrorlist(mirrors: Iterable[dict]) -> Iterable[str]:
