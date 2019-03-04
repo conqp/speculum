@@ -14,7 +14,7 @@ __all__ = ['PLATFORMS', 'main']
 
 PLATFORMS = {
     'x86_64': archlinux_main,
-    'armv7l': archlinuxarm_main
+    'arm': archlinuxarm_main
 }
 
 
@@ -23,9 +23,13 @@ def main():
 
     args = parse_args()
     basicConfig(level=DEBUG if args.verbose else WARNING, format=LOG_FORMAT)
+    platform = machine()
+
+    if platform.startswith('arm'):
+        platform = 'arm'
 
     try:
-        main_func = PLATFORMS[machine()]
+        main_func = PLATFORMS[platform]
     except KeyError:
         LOGGER.critical('Not implemented for "%s".', machine())
         exit(2)
