@@ -1,6 +1,6 @@
 """Yet another Arch Linux mirrorlist optimizer."""
 
-from speculum.platforms import main
+from speculum.platform import main
 
 
 __all__ = ['main']

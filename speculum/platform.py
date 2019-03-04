@@ -1,4 +1,4 @@
-"""Different platforms."""
+"""Cross-platform implementation."""
 
 from logging import DEBUG, WARNING, basicConfig
 from platform import machine
