@@ -29,13 +29,10 @@ def main():
         platform = 'arm'
 
     try:
-        main_func = PLATFORMS[platform]
-    except KeyError:
+        exit_code = PLATFORMS[platform](args)
+    except (KeyError, NotImplementedError):
         LOGGER.critical('Not implemented for "%s".', machine())
         exit(2)
-
-    try:
-        exit_code = main_func(args)
     except KeyboardInterrupt:
         LOGGER.error('Aborted by user.')
         exit(1)
