@@ -9,10 +9,13 @@ from speculum.parsers import hours, posint, regex
 __all__ = ['parse_args']
 
 
+DESCRIPTION = 'Yet another Arch Linux mirrorlist optimizer.'
+
+
 def parse_args() -> Namespace:
     """Returns the parsed arguments."""
 
-    parser = ArgumentParser(description=__doc__)
+    parser = ArgumentParser(description=DESCRIPTION)
     parser.add_argument(
         '-v', '--verbose', action='store_true',
         help='enable more detailed logging')
