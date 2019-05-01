@@ -10,6 +10,7 @@ from urllib.error import URLError
 from urllib.parse import urlparse, ParseResult
 from urllib.request import urlopen
 
+from speculum.argparse import parse_args
 from speculum.cli import iterprint
 from speculum.filtering import match
 from speculum.limiting import limit
@@ -117,8 +118,10 @@ def dump_mirrors(mirrors: list, path: Path) -> int:
     return 0
 
 
-def main(args) -> int:
+def main() -> int:
     """Filters and sorts the mirrors."""
+
+    args = parse_args()
 
     if args.list_sortopts:
         iterprint(sorted(SORTING_DEFAULTS.keys(), reverse=args.reverse))
