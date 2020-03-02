@@ -46,9 +46,7 @@ def set_ages(mirrors: list) -> list:
     now = datetime.now()
 
     for mirror in mirrors:
-        last_sync = mirror.get('last_sync')
-
-        if last_sync:
+        if last_sync := mirror.get('last_sync'):
             last_sync = parse_datetime(last_sync)
         else:
             last_sync = datetime.fromtimestamp(0)
@@ -97,9 +95,9 @@ def get_mirrorlist(mirrors: Iterable[dict]) -> Iterable[str]:
 def list_countries(mirrors: Iterable[dict], reverse: bool = False) -> int:
     """Lists available countries."""
 
-    countries = ((mirr['country'], mirr['country_code']) for mirr in mirrors)
+    countries = {(mirr['country'], mirr['country_code']) for mirr in mirrors}
     countries = filter(lambda country: country[0] and country[1], countries)
-    countries = sorted(frozenset(countries), reverse=reverse)
+    countries = sorted(countries, reverse=reverse)
     iterprint(f'{name} ({code})' for name, code in countries)
     return 0
 
@@ -167,10 +165,14 @@ def main() -> int:
         LOGGER.error('No mirrors found.')
         return 1
 
-    if args.limit is not None and len(mirrors) < args.limit:
+    mirror_count = len(mirrors)
+    LOGGER.info('Mirror list contains %i mirrors.', mirror_count)
+
+    if args.limit is not None and mirror_count < args.limit:
         LOGGER.warning('Filter yielded less mirrors than specified limit.')
 
     if args.output:
+        LOGGER.debug('Writing mirror list to "%s".', args.output)
         return dump_mirrors(mirrors, args.output)
 
     iterprint(get_mirrorlist(mirrors))
