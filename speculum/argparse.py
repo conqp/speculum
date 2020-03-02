@@ -20,6 +20,9 @@ def parse_args() -> Namespace:
         '-v', '--verbose', action='store_true',
         help='enable more detailed logging')
     parser.add_argument(
+        '-d', '--debug', action='store_true',
+        help='enable fully detailed debug logging')
+    parser.add_argument(
         '-S', '--list-sortopts', action='store_true',
         help='list the available sorting options')
     parser.add_argument(

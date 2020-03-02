@@ -3,6 +3,7 @@
 from datetime import datetime
 from functools import partial
 from json import load
+from logging import DEBUG, INFO, WARNING, basicConfig
 from os import linesep
 from pathlib import Path
 from typing import Iterable
@@ -14,7 +15,7 @@ from speculum.argparse import parse_args
 from speculum.cli import iterprint
 from speculum.filtering import match
 from speculum.limiting import limit
-from speculum.logging import LOGGER
+from speculum.logging import LOG_FORMAT, LOGGER
 from speculum.parsers import parse_datetime
 from speculum.sorting import get_sorting_key
 
@@ -123,6 +124,15 @@ def main() -> int:
 
     args = parse_args()
 
+    if args.debug:
+        log_level = DEBUG
+    elif args.verbose:
+        log_level = INFO
+    else:
+        log_level = WARNING
+
+    basicConfig(level=log_level, format=LOG_FORMAT)
+
     if args.list_sortopts:
         iterprint(sorted(SORTING_DEFAULTS.keys(), reverse=args.reverse))
         return 0
@@ -139,13 +149,16 @@ def main() -> int:
     if args.list_countries:
         return list_countries(mirrors, reverse=args.reverse)
 
+    LOGGER.info('Filtering mirrors.')
     mirrors = filter(partial(match, args), mirrors)
 
     if args.sort:
+        LOGGER.info('Sorting mirrors.')
         key = get_sorting_key(args.sort, SORTING_DEFAULTS)
         mirrors = sorted(mirrors, key=key, reverse=args.reverse)
 
     if args.limit:
+        LOGGER.info('Limiting mirrors.')
         mirrors = limit(mirrors, args.limit)
 
     mirrors = tuple(mirrors)
