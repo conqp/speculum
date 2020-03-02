@@ -38,7 +38,7 @@ def parse_args() -> Namespace:
         help='match mirrors that use one of the specified protocols')
     parser.add_argument(
         '-a', '--max-age', type=hours, metavar='hours',
-        help='match mirrors that use one of the specified protocols')
+        help='match mirrors that are not older that the specified age')
     parser.add_argument(
         '-m', '--match', type=regex, metavar='regex',
         help='match mirrors that match the regular expression')
