@@ -3,7 +3,7 @@
 from datetime import datetime
 from functools import partial
 from json import load
-from logging import DEBUG, INFO, WARNING, basicConfig
+from logging import DEBUG, INFO, basicConfig
 from os import linesep
 from pathlib import Path
 from typing import Iterable
@@ -121,15 +121,7 @@ def main() -> int:
     """Filters and sorts the mirrors."""
 
     args = parse_args()
-
-    if args.debug:
-        log_level = DEBUG
-    elif args.verbose:
-        log_level = INFO
-    else:
-        log_level = WARNING
-
-    basicConfig(level=log_level, format=LOG_FORMAT)
+    basicConfig(level=DEBUG if args.verbose else INFO, format=LOG_FORMAT)
 
     if args.list_sortopts:
         iterprint(sorted(SORTING_DEFAULTS.keys(), reverse=args.reverse))
@@ -142,21 +134,21 @@ def main() -> int:
         LOGGER.debug(err)
         return 1
 
-    LOGGER.info('Received %i mirrors.', len(mirrors))
+    LOGGER.debug('Received %i available mirrors.', len(mirrors))
 
     if args.list_countries:
         return list_countries(mirrors, reverse=args.reverse)
 
-    LOGGER.info('Filtering mirrors.')
+    LOGGER.debug('Filtering mirrors.')
     mirrors = filter(partial(match, args), mirrors)
 
     if args.sort:
-        LOGGER.info('Sorting mirrors.')
+        LOGGER.debug('Sorting mirrors.')
         key = get_sorting_key(args.sort, SORTING_DEFAULTS)
         mirrors = sorted(mirrors, key=key, reverse=args.reverse)
 
     if args.limit:
-        LOGGER.info('Limiting mirrors.')
+        LOGGER.debug('Limiting mirrors.')
         mirrors = limit(mirrors, args.limit)
 
     mirrors = tuple(mirrors)
