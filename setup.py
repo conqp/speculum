@@ -14,4 +14,5 @@ setup(
     maintainer_email='<mail at richard dash neumann period de>',
     packages=['speculum'],
     scripts=['files/speculum'],
-    description=('Yet another Arch Linux mirror list optimizer.'))
+    description=('Yet another Arch Linux mirror list optimizer.')
+)
