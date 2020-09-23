@@ -29,7 +29,7 @@ def parse_args() -> Namespace:
         '-f', '--config', type=configfile,
         help='reads settings from the given config file')
     parser.add_argument(
-        '-s', '--sort', nargs='+', metavar='option',
+        '-s', '--sort', nargs='+', type=cistring, metavar='option',
         help='sort by the respective sort options')
     parser.add_argument(
         '-r', '--reverse', action='store_true', help='sort in reversed order')
