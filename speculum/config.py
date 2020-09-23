@@ -19,6 +19,9 @@ def get_cistrings(parser: ConfigParser, section: str, key: str) -> List[str]:
     """
 
     if string := parser.get(section, key, fallback=None):
+        if ',' in string:
+            return [string.strip().casefold() for string in string.split(',')]
+
         return [string.casefold() for string in string.split()]
 
     return None
