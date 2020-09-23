@@ -13,13 +13,13 @@ from speculum.logging import LOGGER
 __all__ = ['Configuration']
 
 
-def get_strings(parser: ConfigParser, section: str, key: str) -> List[str]:
-    """Returns a list of strings from the
-    key in the section iff it is not empty.
+def get_cistrings(parser: ConfigParser, section: str, key: str) -> List[str]:
+    """Returns a list of casefold strings from
+    the key in the section iff it is not empty.
     """
 
     if string := parser.get(section, key, fallback=None):
-        return string.split()
+        return [string.casefold() for string in string.split()]
 
     return None
 
@@ -103,10 +103,10 @@ class Configuration(NamedTuple):
     def from_parser(cls, parser: ConfigParser) -> Configuration:
         """Creates the configuration from the given args."""
         return cls(
-            get_strings(parser, 'sorting', 'sort'),
+            get_cistrings(parser, 'sorting', 'sort'),
             parser.getboolean('sorting', 'reverse', fallback=False),
-            get_strings(parser, 'filtering', 'countries'),
-            get_strings(parser, 'filtering', 'protocols'),
+            get_cistrings(parser, 'filtering', 'countries'),
+            get_cistrings(parser, 'filtering', 'protocols'),
             parser.getint('filtering', 'max_age', fallback=None),
             get_regex(parser, 'filtering', 'match'),
             get_regex(parser, 'filtering', 'nomatch'),
