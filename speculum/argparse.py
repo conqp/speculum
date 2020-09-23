@@ -26,7 +26,7 @@ def parse_args() -> Namespace:
         '-C', '--list-countries', action='store_true',
         help='list the available countries')
     parser.add_argument(
-        '-f', '--config', type=configfile,
+        '-f', '--config', type=configfile, metavar='file',
         help='reads settings from the given config file')
     parser.add_argument(
         '-s', '--sort', nargs='+', type=cistring, metavar='option',
