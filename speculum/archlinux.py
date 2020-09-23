@@ -13,6 +13,7 @@ from urllib.request import urlopen
 
 from speculum.argparse import parse_args
 from speculum.cli import iterprint
+from speculum.config import Configuration
 from speculum.filtering import match
 from speculum.limiting import limit
 from speculum.logging import LOG_FORMAT, LOGGER
@@ -139,33 +140,34 @@ def main() -> int:
     if args.list_countries:
         return list_countries(mirrors, reverse=args.reverse)
 
+    config = Configuration.load(args)
     LOGGER.debug('Filtering mirrors.')
-    mirrors = filter(partial(match, args), mirrors)
+    mirrors = filter(partial(match, config), mirrors)
 
-    if args.sort:
+    if config.sort:
         LOGGER.debug('Sorting mirrors.')
-        key = get_sorting_key(args.sort, SORTING_DEFAULTS)
+        key = get_sorting_key(config.sort, SORTING_DEFAULTS)
         mirrors = sorted(mirrors, key=key, reverse=args.reverse)
 
-    if args.limit:
+    if config.limit:
         LOGGER.debug('Limiting mirrors.')
-        mirrors = limit(mirrors, args.limit)
+        mirrors = limit(mirrors, config.limit)
 
     mirrors = tuple(mirrors)
 
-    if not mirrors and args.limit != 0:
+    if not mirrors and config.limit != 0:
         LOGGER.error('No mirrors found.')
         return 1
 
     mirror_count = len(mirrors)
     LOGGER.info('Mirror list contains %i mirrors.', mirror_count)
 
-    if args.limit is not None and mirror_count < args.limit:
+    if config.limit is not None and mirror_count < config.limit:
         LOGGER.warning('Filter yielded less mirrors than specified limit.')
 
-    if args.output:
-        LOGGER.debug('Writing mirror list to "%s".', args.output)
-        return dump_mirrors(mirrors, args.output)
+    if config.output:
+        LOGGER.debug('Writing mirror list to "%s".', config.output)
+        return dump_mirrors(mirrors, config.output)
 
     iterprint(get_mirrorlist(mirrors))
     return 0
