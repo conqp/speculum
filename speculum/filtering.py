@@ -1,116 +1,116 @@
 """Filtering functions."""
 
-from argparse import Namespace
+from speculum.config import Configuration
 
 
 __all__ = ['match']
 
 
-def match_country(args: Namespace, mirror: dict) -> bool:
+def match_country(config: Configuration, mirror: dict) -> bool:
     """Matches country names an codes."""
 
-    if args.countries is None:
+    if config.countries is None:
         return True
 
     if country := mirror.get('country'):
-        if country.casefold() in args.countries:
+        if country.casefold() in config.countries:
             return True
 
     if country_code := mirror.get('country_code'):
-        if country_code.casefold() in args.countries:
+        if country_code.casefold() in config.countries:
             return True
 
     return False
 
 
-def match_protocols(args: Namespace, mirror: dict) -> bool:
+def match_protocols(config: Configuration, mirror: dict) -> bool:
     """Matches protocol restrictions."""
 
-    if args.protocols is None:
+    if config.protocols is None:
         return True
 
     if protocol := mirror.get('protocol'):
-        return protocol.casefold() in args.protocols
+        return protocol.casefold() in config.protocols
 
     return False
 
 
-def match_max_age(args: Namespace, mirror: dict) -> bool:
+def match_max_age(config: Configuration, mirror: dict) -> bool:
     """Matches maximum age restrictions."""
 
-    if args.max_age is None:
+    if config.max_age is None:
         return True
 
     if age := mirror.get('age') is not None:
-        return age <= args.max_age
+        return age <= config.max_age
 
     return False
 
 
-def match_regex(args: Namespace, mirror: dict) -> bool:
+def match_regex(config: Configuration, mirror: dict) -> bool:
     """Matches regular expressions."""
 
-    if args.match is None:
+    if config.match is None:
         return True
 
     if url := mirror.get('url'):
-        return args.match.match(url)
+        return config.match.match(url)
 
     return False
 
 
-def match_regex_inv(args: Namespace, mirror: dict) -> bool:
+def match_regex_inv(config: Configuration, mirror: dict) -> bool:
     """Negative matches regular expressions."""
 
-    if args.nomatch is None:
+    if config.nomatch is None:
         return True
 
     if url := mirror.get('url'):
-        return args.nomatch.match(url)
+        return config.nomatch.match(url)
 
     return False
 
 
-def match_complete(args: Namespace, mirror: dict) -> bool:
+def match_complete(config: Configuration, mirror: dict) -> bool:
     """Matches complete mirrors."""
 
-    if not args.complete:
+    if not config.complete:
         return True
 
     return mirror.get('completion_pct') == 1
 
 
-def match_active(args: Namespace, mirror: dict) -> bool:
+def match_active(config: Configuration, mirror: dict) -> bool:
     """Matches active mirrors."""
 
-    if not args.active:
+    if not config.active:
         return True
 
     return mirror.get('active')
 
 
-def match_ipv4(args: Namespace, mirror: dict) -> bool:
+def match_ipv4(config: Configuration, mirror: dict) -> bool:
     """Matches IPv4 enabled mirrors."""
 
-    if not args.ipv4:
+    if not config.ipv4:
         return True
 
     return mirror.get('ipv4')
 
 
-def match_ipv6(args: Namespace, mirror: dict) -> bool:
+def match_ipv6(config: Configuration, mirror: dict) -> bool:
     """Matches IPv6 enabled mirrors."""
 
-    if not args.ipv6:
+    if not config.ipv6:
         return True
 
     return mirror.get('ipv6')
 
 
-def match_isos(args: Namespace, mirror: dict) -> bool:
+def match_isos(config: Configuration, mirror: dict) -> bool:
     """Matches mirrors that host ISOs."""
 
-    if not args.isos:
+    if not config.isos:
         return True
 
     return mirror.get('isos')
@@ -130,7 +130,7 @@ MATCH_FUNCS = (
 )
 
 
-def match(args: Namespace, mirror: dict) -> bool:
+def match(config: Configuration, mirror: dict) -> bool:
     """Filters the respective mirrors."""
 
-    return all(match_func(args, mirror) for match_func in MATCH_FUNCS)
+    return all(match_func(config, mirror) for match_func in MATCH_FUNCS)
