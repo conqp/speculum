@@ -47,4 +47,4 @@ def regex(string: str) -> Pattern:
     try:
         return compile(string)
     except error as err:
-        raise ValueError(str(err))
+        raise ValueError(str(err)) from None
