@@ -7,7 +7,7 @@ from distutils.core import setup
 
 setup(
     name='speculum',
-    version='1.5.0',
+    version='1.5.1',
     author='Richard Neumann',
     author_email='<mail at richard dash neumann period de>',
     maintainer='Richard Neumann',
