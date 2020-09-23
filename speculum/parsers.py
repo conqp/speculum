@@ -13,7 +13,7 @@ def hours(string: str) -> timedelta:
     return timedelta(hours=int(string))
 
 
-def icstring(string: str) -> string:
+def icstring(string: str) -> str:
     """Returns a string with ignored case."""
 
     return string.casefold()
