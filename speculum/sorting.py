@@ -13,7 +13,7 @@ def get_sorting_key(sorting: Iterable[str], defaults: dict) -> Callable:
 
     warned = set()
 
-    def keyfunc(mirror: dict) -> tuple:
+    def get_key(mirror: dict) -> tuple:
         """Returns a sorting key for mirror from the given sorting options."""
 
         key = []
@@ -28,10 +28,11 @@ def get_sorting_key(sorting: Iterable[str], defaults: dict) -> Callable:
 
                 continue
 
-            value = mirror.get(option)
-            value = default if value is None else value
-            key.append(value)
+            if value := mirror.get(option) is not None:
+                key.append(value)
+            else:
+                key.append(default)
 
         return tuple(key)
 
-    return keyfunc
+    return get_key
