@@ -3,7 +3,7 @@
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
 
-from speculum.parsers import hours, icstring, posint, regex
+from speculum.parsers import configfile, hours, icstring, posint, regex
 
 
 __all__ = ['parse_args']
@@ -25,6 +25,9 @@ def parse_args() -> Namespace:
     parser.add_argument(
         '-C', '--list-countries', action='store_true',
         help='list the available countries')
+    parser.add_argument(
+        '-f', '--config', type=configfile,
+        help='reads settings from the given config file')
     parser.add_argument(
         '-s', '--sort', nargs='+', metavar='option',
         help='sort by the respective sort options')
