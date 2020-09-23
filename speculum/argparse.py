@@ -3,7 +3,7 @@
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
 
-from speculum.parsers import configfile, hours, icstring, posint, regex
+from speculum.parsers import configfile, hours, cistring, posint, regex
 
 
 __all__ = ['parse_args']
@@ -34,10 +34,10 @@ def parse_args() -> Namespace:
     parser.add_argument(
         '-r', '--reverse', action='store_true', help='sort in reversed order')
     parser.add_argument(
-        '-c', '--countries', nargs='+', type=icstring, metavar='country',
+        '-c', '--countries', nargs='+', type=cistring, metavar='country',
         help='match mirrors of these countries')
     parser.add_argument(
-        '-p', '--protocols', nargs='+', type=icstring, metavar='protocol',
+        '-p', '--protocols', nargs='+', type=cistring, metavar='protocol',
         help='match mirrors that use one of the specified protocols')
     parser.add_argument(
         '-a', '--max-age', type=hours, metavar='hours',
