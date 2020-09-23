@@ -69,19 +69,6 @@ class Configuration(NamedTuple):
     limit: int
     output: Path
 
-    def __or__(self, other):
-        if other is None:
-            return self
-
-        args = (o if s is None else s for s, o in zip(self, other))
-        return type(self)(*args)
-
-    def __ror__(self, other):
-        if other is None:
-            return self
-
-        return other | self
-
     @classmethod
     def from_args(cls, args: Namespace) -> Configuration:
         """Creates the configuration from the given args."""
@@ -125,5 +112,16 @@ class Configuration(NamedTuple):
     @classmethod
     def load(cls, args: Namespace) -> Configuration:
         """Loads the configuration from the arguments."""
-        config = cls.from_parser(args.config) if args.config else None
-        return config | cls.from_args(args)
+        config = cls.from_args(args)
+
+        if args.config:
+            return cls.from_parser(args.config).update(config)
+
+        return config
+
+    def update(self, other):
+        """Returns a new configuration with properties overridden
+        by another configuration iff they are not None.
+        """
+        args = (s if o is None else o for s, o in zip(self, other))
+        return type(self)(*args)
