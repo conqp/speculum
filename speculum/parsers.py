@@ -4,13 +4,19 @@ from datetime import datetime, timedelta
 from re import error, compile, Pattern  # pylint: disable=W0622
 
 
-__all__ = ['hours', 'posint', 'regex', 'parse_datetime']
+__all__ = ['hours', 'icstring', 'posint', 'regex', 'parse_datetime']
 
 
 def hours(string: str) -> timedelta:
     """Returns a time delta for the given hours."""
 
     return timedelta(hours=int(string))
+
+
+def icstring(string: str) -> string:
+    """Returns a string with ignored case."""
+
+    return string.casefold()
 
 
 def parse_datetime(string: str) -> datetime:
