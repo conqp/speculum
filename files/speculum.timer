@@ -1,0 +1,10 @@
+[Unit]
+Description=Refresh Pacman mirrorlist weekly with Speculum.
+
+[Timer]
+OnCalendar=weekly
+Persistent=true
+RandomizedDelaySec=12h
+
+[Install]
+WantedBy=timers.target
