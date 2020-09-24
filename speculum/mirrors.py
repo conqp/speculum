@@ -67,9 +67,11 @@ def get_lines(mirrors: Iterable[dict], config: Configuration) -> Iterable[str]:
     """Returns a mirror list record."""
 
     if config.header:
-        yield '# Mirror list generated with speculum'
-        yield f'#     on {datetime.now()}'
-        yield f'#     with configuration: {config}'
+        yield f'# Mirror list generated with speculum on {datetime.now()}'
+        yield '# with configuration:'
+
+        for line in config.lines():
+            yield f'#     {line}'
 
     for mirror in mirrors:
         url = mirror_url(mirror['url'])

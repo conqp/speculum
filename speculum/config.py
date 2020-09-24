@@ -5,7 +5,7 @@ from argparse import Namespace
 from configparser import ConfigParser
 from pathlib import Path
 from re import error, compile, Pattern  # pylint: disable=W0622
-from typing import List, NamedTuple
+from typing import Iterable, List, NamedTuple
 
 from speculum.logging import LOGGER
 
@@ -122,9 +122,15 @@ class Configuration(NamedTuple):
 
         return config
 
-    def update(self, other):
+    def update(self, other: Configuration) -> Configuration:
         """Returns a new configuration with properties overridden
         by another configuration iff they are not None.
         """
         args = (s if o is None else o for s, o in zip(self, other))
         return type(self)(*args)
+
+    def lines(self, none: bool = False) -> Iterable[str]:
+        """Yield lines of keys and values."""
+        for key, value in self._asdict().items():   # pylint: disable=E1101
+            if none or value is not None:
+                yield f'{key} = {value}'
