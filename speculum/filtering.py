@@ -54,7 +54,7 @@ def match_regex(config: Configuration, mirror: dict) -> bool:
         return True
 
     if url := mirror.get('url'):
-        return config.match.match(url)
+        return config.match.search(url)
 
     return False
 
@@ -66,7 +66,7 @@ def match_regex_inv(config: Configuration, mirror: dict) -> bool:
         return True
 
     if url := mirror.get('url'):
-        return config.nomatch.match(url)
+        return config.nomatch.search(url)
 
     return False
 
