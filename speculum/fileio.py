@@ -10,7 +10,7 @@ from speculum.logging import LOGGER
 __all__ = ['dump_mirrors']
 
 
-def dump_mirrors(lines: Iterable[str], path: Path) -> int:
+def dump_mirrors(lines: Iterable[str], path: Path) -> bool:
     """Dumps the mirrors to the given path."""
 
     mirrorlist = linesep.join(lines)
@@ -20,6 +20,6 @@ def dump_mirrors(lines: Iterable[str], path: Path) -> int:
             file.write(mirrorlist + linesep)
     except PermissionError as permission_error:
         LOGGER.error(permission_error)
-        return 1
+        return False
 
-    return 0
+    return True

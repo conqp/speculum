@@ -95,7 +95,7 @@ def main() -> int:
 
     if config.output:
         LOGGER.debug('Writing mirror list to "%s".', config.output)
-        return dump_mirrors(lines, config.output)
+        return 0 if dump_mirrors(lines, config.output) else 1
 
     iterprint(lines)
     return 0
