@@ -22,6 +22,7 @@ def prepare_mirrors(mirrors: Iterable[dict]) -> Iterable[dict]:
     """Sets ages on mirrors."""
 
     now = datetime.now()
+    count = 0
 
     for mirror in mirrors:
         if not mirror.get('url'):
@@ -34,7 +35,10 @@ def prepare_mirrors(mirrors: Iterable[dict]) -> Iterable[dict]:
             last_sync = datetime.fromtimestamp(0)
 
         mirror['age'] = now - last_sync
+        count += 1
         yield mirror
+
+    LOGGER.debug('Received %i available mirrors.', count)
 
 
 def get_mirrors() -> Iterable[dict]:

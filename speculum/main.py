@@ -61,8 +61,6 @@ def main() -> int:
         LOGGER.debug(err)
         return 1
 
-    LOGGER.debug('Received %i available mirrors.', len(mirrors))
-
     if args.list_countries:
         return list_countries(mirrors, reverse=args.reverse)
 
