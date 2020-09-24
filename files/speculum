@@ -20,7 +20,7 @@
 ##############################################################################
 """Yet another Arch Linux mirrorlist optimizer."""
 
-from speculum import main
+from speculum.main import main
 
 
 if __name__ == '__main__':
