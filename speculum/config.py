@@ -67,6 +67,7 @@ class Configuration(NamedTuple):
     ipv6: bool
     isos: bool
     limit: int
+    header: bool
     output: Path
 
     @classmethod
@@ -86,6 +87,7 @@ class Configuration(NamedTuple):
             args.ipv6,
             args.isos,
             args.limit,
+            args.header,
             args.output
         )
 
@@ -94,18 +96,19 @@ class Configuration(NamedTuple):
         """Creates the configuration from the given args."""
         return cls(
             get_cistrings(parser, 'sorting', 'sort'),
-            parser.getboolean('sorting', 'reverse', fallback=False),
+            parser.getboolean('sorting', 'reverse', fallback=None),
             get_cistrings(parser, 'filtering', 'countries'),
             get_cistrings(parser, 'filtering', 'protocols'),
             parser.getint('filtering', 'max_age', fallback=None),
             get_regex(parser, 'filtering', 'match'),
             get_regex(parser, 'filtering', 'nomatch'),
-            parser.getboolean('filtering', 'complete', fallback=False),
-            parser.getboolean('filtering', 'active', fallback=False),
-            parser.getboolean('filtering', 'ipv4', fallback=False),
-            parser.getboolean('filtering', 'ipv6', fallback=False),
-            parser.getboolean('filtering', 'isos', fallback=False),
+            parser.getboolean('filtering', 'complete', fallback=None),
+            parser.getboolean('filtering', 'active', fallback=None),
+            parser.getboolean('filtering', 'ipv4', fallback=None),
+            parser.getboolean('filtering', 'ipv6', fallback=None),
+            parser.getboolean('filtering', 'isos', fallback=None),
             parser.getint('output', 'limit', fallback=None),
+            parser.getboolean('output', 'header', fallback=None),
             get_path(parser, 'output', 'file')
         )
 

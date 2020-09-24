@@ -1,31 +1,24 @@
 """Mirror filtering implementation for the original Arch Linux."""
 
-from datetime import datetime
 from functools import partial
-from json import load
 from logging import DEBUG, INFO, basicConfig
-from os import linesep
-from pathlib import Path
 from typing import Iterable
 from urllib.error import URLError
-from urllib.parse import urlparse, ParseResult
-from urllib.request import urlopen
 
 from speculum.argparse import parse_args
 from speculum.cli import iterprint
 from speculum.config import Configuration
+from speculum.fileio import dump_mirrors
 from speculum.filtering import match
 from speculum.limiting import limit
 from speculum.logging import LOG_FORMAT, LOGGER
-from speculum.parsers import parse_datetime
+from speculum.mirrors import get_mirrors, get_lines
 from speculum.sorting import get_sorting_key
 
 
 __all__ = ['main']
 
 
-MIRRORS_URL = 'https://www.archlinux.org/mirrors/status/json/'
-REPO_PATH = '$repo/os/$arch'
 SORTING_DEFAULTS = {
     'url': '',
     'protocol': '~',
@@ -41,58 +34,6 @@ SORTING_DEFAULTS = {
 }
 
 
-def set_ages(mirrors: list) -> list:
-    """Sets ages on mirrors."""
-
-    now = datetime.now()
-
-    for mirror in mirrors:
-        if last_sync := mirror.get('last_sync'):
-            last_sync = parse_datetime(last_sync)
-        else:
-            last_sync = datetime.fromtimestamp(0)
-
-        mirror['age'] = now - last_sync
-
-    return mirrors
-
-
-def get_mirrors() -> list:
-    """Returns the mirrors from the respective URL."""
-
-    with urlopen(MIRRORS_URL) as response:
-        json = load(response)
-
-    return set_ages(json['urls'])
-
-
-def mirror_url(url: str) -> str:
-    """Returns a mirror list URL."""
-
-    scheme, netloc, path, params, query, fragment = urlparse(url)
-
-    if not path.endswith('/'):
-        path += '/'
-
-    path += REPO_PATH
-    url = ParseResult(scheme, netloc, path, params, query, fragment)
-    return url.geturl()
-
-
-def get_mirrorlist(mirrors: Iterable[dict]) -> Iterable[str]:
-    """Returns a mirror list record."""
-
-    for mirror in mirrors:
-        url = mirror['url']
-
-        if not url:
-            LOGGER.warning('Skipping mirror without URL.')
-            continue
-
-        url = mirror_url(url)
-        yield f'Server = {url}'
-
-
 def list_countries(mirrors: Iterable[dict], reverse: bool = False) -> int:
     """Lists available countries."""
 
@@ -100,21 +41,6 @@ def list_countries(mirrors: Iterable[dict], reverse: bool = False) -> int:
     countries = filter(lambda country: country[0] and country[1], countries)
     countries = sorted(countries, reverse=reverse)
     iterprint(f'{name} ({code})' for name, code in countries)
-    return 0
-
-
-def dump_mirrors(mirrors: list, path: Path) -> int:
-    """Dumps the mirrors to the given path."""
-
-    mirrorlist = linesep.join(get_mirrorlist(mirrors))
-
-    try:
-        with path.open('w') as file:
-            file.write(mirrorlist + linesep)
-    except PermissionError as permission_error:
-        LOGGER.error(permission_error)
-        return 1
-
     return 0
 
 
@@ -165,9 +91,11 @@ def main() -> int:
     if config.limit is not None and mirror_count < config.limit:
         LOGGER.warning('Filter yielded less mirrors than specified limit.')
 
+    lines = get_lines(mirrors, config)
+
     if config.output:
         LOGGER.debug('Writing mirror list to "%s".', config.output)
-        return dump_mirrors(mirrors, config.output)
+        return dump_mirrors(lines, config.output)
 
-    iterprint(get_mirrorlist(mirrors))
+    iterprint(lines)
     return 0

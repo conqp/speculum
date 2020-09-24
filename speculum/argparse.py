@@ -26,6 +26,9 @@ def parse_args() -> Namespace:
         '-C', '--list-countries', action='store_true',
         help='list the available countries')
     parser.add_argument(
+        '-H', '--header', action='store_true',
+        help='print a header before list of mirrors')
+    parser.add_argument(
         '-f', '--config', type=configfile, metavar='file',
         help='reads settings from the given config file')
     parser.add_argument(
