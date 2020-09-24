@@ -75,19 +75,19 @@ class Configuration(NamedTuple):
         """Creates the configuration from the given args."""
         return cls(
             args.sort,
-            args.reverse,
+            args.reverse or None,
             args.countries,
             args.protocols,
             args.max_age,
             args.match,
             args.nomatch,
-            args.complete,
-            args.active,
-            args.ipv4,
-            args.ipv6,
-            args.isos,
+            args.complete or None,
+            args.active or None,
+            args.ipv4 or None,
+            args.ipv6 or None,
+            args.isos or None,
             args.limit,
-            args.header,
+            args.header or None,
             args.output
         )
 
