@@ -49,7 +49,7 @@ def main() -> int:
     if config.sort:
         LOGGER.debug('Sorting mirrors.')
         key = get_sorting_key(config.sort, SORTING_DEFAULTS)
-        mirrors = sorted(mirrors, key=key, reverse=args.reverse)
+        mirrors = sorted(mirrors, key=key, reverse=config.reverse)
 
     if config.limit:
         LOGGER.debug('Limiting mirrors.')
