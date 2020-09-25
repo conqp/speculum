@@ -6,9 +6,8 @@ from typing import Iterable
 from urllib.error import URLError
 
 from speculum.argparse import parse_args
-from speculum.cli import iterprint
 from speculum.config import Configuration
-from speculum.fileio import dump_mirrors
+from speculum.io import dump_mirrors, iterprint
 from speculum.filtering import match
 from speculum.limiting import limit
 from speculum.logging import LOG_FORMAT, LOGGER
