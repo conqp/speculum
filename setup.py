@@ -16,7 +16,7 @@ setup(
     scripts=['files/speculum'],
     data_files=[
         ('/etc', ['files/speculum.conf']),
-        ('/etc/systemd/system', [
+        ('/usr/lib/systemd/system', [
             'files/speculum.service',
             'files/speculum.timer'
         ])
