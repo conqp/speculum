@@ -26,9 +26,10 @@ def main() -> int:
 
     args = parse_args()
     basicConfig(level=DEBUG if args.verbose else INFO, format=LOG_FORMAT)
+    config = Configuration.load(args)
 
     if args.list_sortopts:
-        iterprint(sorted(SORTING_DEFAULTS.keys(), reverse=args.reverse))
+        iterprint(sorted(SORTING_DEFAULTS.keys(), reverse=config.reverse))
         return 0
 
     try:
@@ -39,10 +40,9 @@ def main() -> int:
         return 2
 
     if args.list_countries:
-        list_countries(mirrors, reverse=args.reverse)
+        list_countries(mirrors, reverse=config.reverse)
         return 0
 
-    config = Configuration.load(args)
     LOGGER.debug('Filtering mirrors.')
     mirrors = filter(partial(match, config), mirrors)
 
