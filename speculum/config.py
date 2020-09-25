@@ -75,19 +75,19 @@ class Configuration(NamedTuple):
         """Creates the configuration from the given args."""
         return cls(
             args.sort,
-            args.reverse or None,
+            args.reverse,
             args.countries,
             args.protocols,
             args.max_age,
             args.match,
             args.nomatch,
-            args.complete or None,
-            args.active or None,
-            args.ipv4 or None,
-            args.ipv6 or None,
-            args.isos or None,
+            args.complete,
+            args.active,
+            args.ipv4,
+            args.ipv6,
+            args.isos,
             args.limit,
-            args.header or None,
+            args.header,
             args.output
         )
 
@@ -96,19 +96,19 @@ class Configuration(NamedTuple):
         """Creates the configuration from the given args."""
         return cls(
             get_cistrings(parser, 'sorting', 'sort'),
-            parser.getboolean('sorting', 'reverse', fallback=None),
+            parser.getboolean('sorting', 'reverse', fallback=False),
             get_cistrings(parser, 'filtering', 'countries'),
             get_cistrings(parser, 'filtering', 'protocols'),
             parser.getint('filtering', 'max_age', fallback=None),
             get_regex(parser, 'filtering', 'match'),
             get_regex(parser, 'filtering', 'nomatch'),
-            parser.getboolean('filtering', 'complete', fallback=None),
-            parser.getboolean('filtering', 'active', fallback=None),
-            parser.getboolean('filtering', 'ipv4', fallback=None),
-            parser.getboolean('filtering', 'ipv6', fallback=None),
-            parser.getboolean('filtering', 'isos', fallback=None),
+            parser.getboolean('filtering', 'complete', fallback=False),
+            parser.getboolean('filtering', 'active', fallback=False),
+            parser.getboolean('filtering', 'ipv4', fallback=False),
+            parser.getboolean('filtering', 'ipv6', fallback=False),
+            parser.getboolean('filtering', 'isos', fallback=False),
             parser.getint('output', 'limit', fallback=None),
-            parser.getboolean('output', 'header', fallback=None),
+            parser.getboolean('output', 'header', fallback=False),
             get_path(parser, 'output', 'file')
         )
 
@@ -126,8 +126,7 @@ class Configuration(NamedTuple):
         """Returns a new configuration with properties overridden
         by another configuration iff they are not None.
         """
-        args = (s if o is None else o for s, o in zip(self, other))
-        return type(self)(*args)
+        return type(self)(*(o or s for s, o in zip(self, other)))
 
     def lines(self, none: bool = False) -> Iterable[str]:
         """Yield lines of keys and values."""
