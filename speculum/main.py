@@ -1,4 +1,4 @@
-"""Mirror filtering implementation for the original Arch Linux."""
+"""Mirror list optimization CLI utility for Arch Linux."""
 
 from functools import partial
 from logging import DEBUG, INFO, basicConfig
