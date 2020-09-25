@@ -2,20 +2,34 @@
 
 from datetime import datetime
 from json import load
-from typing import Iterable
+from typing import Iterable, Tuple
 from urllib.parse import urlparse, ParseResult
 from urllib.request import urlopen
 
 from speculum.config import Configuration
+from speculum.io import iterprint
 from speculum.logging import LOGGER
 from speculum.parsers import parse_datetime
 
 
-__all__ = ['get_mirrors', 'get_lines']
+__all__ = ['SORTING_DEFAULTS', 'get_mirrors', 'get_lines', 'list_countries']
 
 
 MIRRORS_URL = 'https://www.archlinux.org/mirrors/status/json/'
 REPO_PATH = '$repo/os/$arch'
+SORTING_DEFAULTS = {
+    'url': '',
+    'protocol': '~',
+    'last_sync': '~',
+    'completion_pct': 0,
+    'delay': float('inf'),
+    'duration_avg': float('inf'),
+    'duration_stddev': float('inf'),
+    'score': float('inf'),
+    'country': '~',
+    'country_code': '~',
+    'age': None
+}
 
 
 def prepare_mirrors(mirrors: Iterable[dict]) -> Iterable[dict]:
@@ -76,3 +90,20 @@ def get_lines(mirrors: Iterable[dict], config: Configuration) -> Iterable[str]:
     for mirror in mirrors:
         url = mirror_url(mirror['url'])
         yield f'Server = {url}'
+
+
+def get_countries(mirrors: Iterable[dict]) -> Iterable[Tuple[str, str]]:
+    """Yields available countries."""
+
+    for mirror in mirrors:
+        name, code = mirror.get('country'), mirror.get('country_code')
+
+        if name and mirror:
+            yield (name, code)
+
+
+def list_countries(mirrors: Iterable[dict], reverse: bool = False) -> int:
+    """Lists available countries."""
+
+    countries = sorted(get_countries(mirrors), reverse=reverse)
+    iterprint(f'{name} ({code})' for name, code in countries)

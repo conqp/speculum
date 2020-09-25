@@ -1,8 +1,9 @@
-"""Command line tools."""
+"""Input / output and CLI utilities."""
 
+from functools import wraps
 from os import linesep
 from pathlib import Path
-from sys import stderr
+from sys import exit, stderr    # pylint: disable=W0622
 from typing import Iterable
 
 from speculum.logging import LOGGER
@@ -24,6 +25,16 @@ def dump_mirrors(lines: Iterable[str], path: Path) -> bool:
         return False
 
     return True
+
+
+def exiting(function):
+    """Makes a function exit with the returned exit code."""
+
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        exit(function(*args, **kwargs))
+
+    return wrapper
 
 
 def iterprint(items: Iterable[str]):
