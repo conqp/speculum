@@ -1,17 +1,17 @@
 #! /usr/bin/env python3
-"""Install script."""
+"""Installation script."""
 
 
-from distutils.core import setup
+from setuptools import setup
 
 
 setup(
     name='speculum',
-    version='1.5.2',
+    version_format='{tag}',
+    setup_requires=['setuptools-git-version'],
     author='Richard Neumann',
-    author_email='<mail at richard dash neumann period de>',
-    maintainer='Richard Neumann',
-    maintainer_email='<mail at richard dash neumann period de>',
+    author_email='mail@richard-neumann.de',
+    python_requires='>=3.8',
     packages=['speculum'],
     scripts=['files/speculum'],
     data_files=[
@@ -21,5 +21,8 @@ setup(
             'files/speculum.timer'
         ])
     ],
-    description=('Yet another Arch Linux mirror list optimizer.')
+    url='https://github.com/conqp/speculum',
+    license='GPLv3',
+    description='Yet another Arch Linux mirror list optimizer.',
+    keywords='pacman mirror list mirrorlist optimizer filter'
 )
