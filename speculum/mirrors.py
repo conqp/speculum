@@ -105,5 +105,5 @@ def get_countries(mirrors: Iterable[dict]) -> Iterator[Tuple[str, str]]:
 def list_countries(mirrors: Iterable[dict], reverse: bool = False) -> None:
     """Lists available countries."""
 
-    countries = sorted(get_countries(mirrors), reverse=reverse)
+    countries = sorted(set(get_countries(mirrors)), reverse=reverse)
     iterprint(f'{name} ({code})' for name, code in countries)
