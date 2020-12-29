@@ -5,7 +5,7 @@ from argparse import Namespace
 from configparser import ConfigParser
 from pathlib import Path
 from re import error, compile, Pattern  # pylint: disable=W0622
-from typing import Iterable, List, NamedTuple
+from typing import Iterator, List, NamedTuple, Optional
 
 from speculum.logging import LOGGER
 
@@ -13,7 +13,8 @@ from speculum.logging import LOGGER
 __all__ = ['Configuration']
 
 
-def get_cistrings(parser: ConfigParser, section: str, key: str) -> List[str]:
+def get_cistrings(parser: ConfigParser, section: str,
+                  key: str) -> Optional[List[str]]:
     """Returns a list of casefold strings from
     the key in the section iff it is not empty.
     """
@@ -27,7 +28,8 @@ def get_cistrings(parser: ConfigParser, section: str, key: str) -> List[str]:
     return None
 
 
-def get_regex(parser: ConfigParser, section: str, key: str) -> Pattern:
+def get_regex(parser: ConfigParser, section: str,
+              key: str) -> Optional[Pattern]:
     """Returns a regular expression if available."""
 
     if regex := parser.get(section, key, fallback=None):
@@ -39,7 +41,7 @@ def get_regex(parser: ConfigParser, section: str, key: str) -> Pattern:
     return None
 
 
-def get_path(parser: ConfigParser, section: str, key: str) -> Path:
+def get_path(parser: ConfigParser, section: str, key: str) -> Optional[Path]:
     """Returns a path if available."""
 
     if path := parser.get(section, key, fallback=None):
@@ -128,7 +130,7 @@ class Configuration(NamedTuple):
         """
         return type(self)(*(o or s for s, o in zip(self, other)))
 
-    def lines(self, none: bool = False) -> Iterable[str]:
+    def lines(self, none: bool = False) -> Iterator[str]:
         """Yield lines of keys and values."""
         for key, value in self._asdict().items():   # pylint: disable=E1101
             if none or value is not None:
