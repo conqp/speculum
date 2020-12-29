@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from json import load
-from typing import Iterable, Tuple
+from typing import Iterable, Iterator, Tuple
 from urllib.parse import urlparse, ParseResult
 from urllib.request import urlopen
 
@@ -32,7 +32,7 @@ SORTING_DEFAULTS = {
 }
 
 
-def prepare_mirrors(mirrors: Iterable[dict]) -> Iterable[dict]:
+def prepare_mirrors(mirrors: Iterable[dict]) -> Iterator[dict]:
     """Sets ages on mirrors."""
 
     now = datetime.now()
@@ -55,7 +55,7 @@ def prepare_mirrors(mirrors: Iterable[dict]) -> Iterable[dict]:
     LOGGER.debug('Received %i available mirrors.', count)
 
 
-def get_mirrors() -> Iterable[dict]:
+def get_mirrors() -> Iterator[dict]:
     """Returns the mirrors from the respective URL."""
 
     with urlopen(MIRRORS_URL) as response:
@@ -77,7 +77,7 @@ def mirror_url(url: str) -> str:
     return url.geturl()
 
 
-def get_lines(mirrors: Iterable[dict], config: Configuration) -> Iterable[str]:
+def get_lines(mirrors: Iterable[dict], config: Configuration) -> Iterator[str]:
     """Returns a mirror list record."""
 
     if config.header:
@@ -92,7 +92,7 @@ def get_lines(mirrors: Iterable[dict], config: Configuration) -> Iterable[str]:
         yield f'Server = {url}'
 
 
-def get_countries(mirrors: Iterable[dict]) -> Iterable[Tuple[str, str]]:
+def get_countries(mirrors: Iterable[dict]) -> Iterator[Tuple[str, str]]:
     """Yields available countries."""
 
     for mirror in mirrors:
@@ -102,7 +102,7 @@ def get_countries(mirrors: Iterable[dict]) -> Iterable[Tuple[str, str]]:
             yield (name, code)
 
 
-def list_countries(mirrors: Iterable[dict], reverse: bool = False) -> int:
+def list_countries(mirrors: Iterable[dict], reverse: bool = False) -> None:
     """Lists available countries."""
 
     countries = sorted(get_countries(mirrors), reverse=reverse)
