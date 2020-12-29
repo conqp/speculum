@@ -41,7 +41,12 @@ def hours(string: str) -> timedelta:
 def parse_datetime(string: str) -> datetime:
     """Parses a mirror's last_sync datetime stamp."""
 
-    return datetime.fromisoformat(string).replace(tzinfo=None)
+    try:
+        dtime = datetime.strptime(string, '%Y-%m-%dT%H:%M:%S.%fZ')
+    except ValueError:
+        dtime = datetime.strptime(string, '%Y-%m-%dT%H:%M:%SZ')
+
+    return dtime.replace(tzinfo=None)
 
 
 def posint(string: str) -> int:
