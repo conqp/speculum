@@ -1,5 +1,5 @@
 [Unit]
-Description=Refresh Pacman mirrorlist weekly with Speculum
+Description=Update pacman mirrorlist weekly
 
 [Timer]
 OnCalendar=weekly
