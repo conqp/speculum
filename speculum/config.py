@@ -3,6 +3,7 @@
 from __future__ import annotations
 from argparse import Namespace
 from configparser import ConfigParser
+from datetime import timedelta
 from pathlib import Path
 from re import error, compile, Pattern  # pylint: disable=W0622
 from typing import Iterator, List, NamedTuple, Optional
@@ -60,7 +61,7 @@ class Configuration(NamedTuple):
     reverse: bool
     countries: List[str]
     protocols: List[str]
-    max_age: int
+    max_age: timedelta
     match: Pattern
     nomatch: Pattern
     complete: bool
@@ -96,12 +97,14 @@ class Configuration(NamedTuple):
     @classmethod
     def from_parser(cls, parser: ConfigParser) -> Configuration:
         """Creates the configuration from the given args."""
+        max_age = parser.getint('filtering', 'max_age', fallback=None)
+
         return cls(
             get_cistrings(parser, 'sorting', 'sort'),
             parser.getboolean('sorting', 'reverse', fallback=False),
             get_cistrings(parser, 'filtering', 'countries'),
             get_cistrings(parser, 'filtering', 'protocols'),
-            parser.getint('filtering', 'max_age', fallback=None),
+            None if max_age is None else timedelta(hours=max_age),
             get_regex(parser, 'filtering', 'match'),
             get_regex(parser, 'filtering', 'nomatch'),
             parser.getboolean('filtering', 'complete', fallback=False),

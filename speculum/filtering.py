@@ -1,6 +1,6 @@
 """Filtering functions."""
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import partial
 from re import Pattern
 from typing import Callable, Iterable, Iterator, List
@@ -35,13 +35,11 @@ def match_protocols(protocols: List[str], mirror: dict) -> bool:
     return False
 
 
-def match_max_age(now: datetime, max_age: int, mirror: dict) -> bool:
+def match_max_age(now: datetime, max_age: timedelta, mirror: dict) -> bool:
     """Matches maximum age restrictions."""
 
     if last_sync := mirror.get('last_sync'):
-        age = now - parse_datetime(last_sync)
-        hours = age.total_seconds() / 3600
-        return hours <= max_age
+        return now - parse_datetime(last_sync) <= max_age
 
     return False
 
