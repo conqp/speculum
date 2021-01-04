@@ -1,136 +1,100 @@
 """Filtering functions."""
 
+from functools import partial
+from re import Pattern
+from typing import Callable, Iterable, Iterator, List
+
 from speculum.config import Configuration
 
 
-__all__ = ['match']
+__all__ = ['get_filters', 'match']
 
 
-def match_country(config: Configuration, mirror: dict) -> bool:
+def match_country(countries: List[str], mirror: dict) -> bool:
     """Matches country names an codes."""
 
-    if config.countries is None:
-        return True
-
     if country := mirror.get('country'):
-        if country.casefold() in config.countries:
+        if country.casefold() in countries:
             return True
 
     if country_code := mirror.get('country_code'):
-        if country_code.casefold() in config.countries:
+        if country_code.casefold() in countries:
             return True
 
     return False
 
 
-def match_protocols(config: Configuration, mirror: dict) -> bool:
+def match_protocols(protocols: List[str], mirror: dict) -> bool:
     """Matches protocol restrictions."""
 
-    if config.protocols is None:
-        return True
-
     if protocol := mirror.get('protocol'):
-        return protocol.casefold() in config.protocols
+        return protocol.casefold() in protocols
 
     return False
 
 
-def match_max_age(config: Configuration, mirror: dict) -> bool:
+def match_max_age(max_age: int, mirror: dict) -> bool:
     """Matches maximum age restrictions."""
 
-    if config.max_age is None:
-        return True
-
     if age := mirror.get('age') is not None:
-        return age <= config.max_age
+        return age <= max_age
 
     return False
 
 
-def match_regex(config: Configuration, mirror: dict) -> bool:
+def match_regex(pattern: Pattern, mirror: dict) -> bool:
     """Matches regular expressions."""
 
-    if config.match is None:
-        return True
-
     if url := mirror.get('url'):
-        return config.match.search(url)
+        return pattern.search(url)
 
     return False
 
 
-def match_regex_inv(config: Configuration, mirror: dict) -> bool:
+def match_regex_inv(pattern: Pattern, mirror: dict) -> bool:
     """Negative matches regular expressions."""
 
-    if config.nomatch is None:
-        return True
-
     if url := mirror.get('url'):
-        return config.nomatch.search(url)
+        return pattern.search(url)
 
     return False
 
 
-def match_complete(config: Configuration, mirror: dict) -> bool:
-    """Matches complete mirrors."""
+def get_filters(config: Configuration) -> Iterator[Callable[[dict], bool]]:
+    """Yields functions to match the given mirror."""
 
-    if not config.complete:
-        return True
+    if config.countries is not None:
+        yield partial(match_country, config.countries)
 
-    return mirror.get('completion_pct') == 1
+    if config.protocols is not None:
+        yield partial(match_protocols, config.protocols)
 
+    if config.max_age is not None:
+        yield partial(match_max_age, config.max_age)
 
-def match_active(config: Configuration, mirror: dict) -> bool:
-    """Matches active mirrors."""
+    if config.match is not None:
+        yield partial(match_regex, config.match)
 
-    if not config.active:
-        return True
+    if config.nomatch is not None:
+        yield partial(match_regex_inv, config.nomatch)
 
-    return mirror.get('active')
+    if config.complete:
+        yield lambda mirror: mirror.get('completion_pct') == 1
 
+    if config.active:
+        yield lambda mirror: mirror.get('active')
 
-def match_ipv4(config: Configuration, mirror: dict) -> bool:
-    """Matches IPv4 enabled mirrors."""
+    if config.ipv4:
+        yield lambda mirror: mirror.get('ipv4')
 
-    if not config.ipv4:
-        return True
+    if config.ipv6:
+        yield lambda mirror: mirror.get('ipv6')
 
-    return mirror.get('ipv4')
-
-
-def match_ipv6(config: Configuration, mirror: dict) -> bool:
-    """Matches IPv6 enabled mirrors."""
-
-    if not config.ipv6:
-        return True
-
-    return mirror.get('ipv6')
+    if config.isos:
+        yield lambda mirror: mirror.get('isos')
 
 
-def match_isos(config: Configuration, mirror: dict) -> bool:
-    """Matches mirrors that host ISOs."""
-
-    if not config.isos:
-        return True
-
-    return mirror.get('isos')
-
-
-MATCH_FUNCS = (
-    match_country,
-    match_protocols,
-    match_max_age,
-    match_regex,
-    match_regex_inv,
-    match_complete,
-    match_active,
-    match_ipv4,
-    match_ipv6,
-    match_isos
-)
-
-
-def match(config: Configuration, mirror: dict) -> bool:
+def match(functions: Iterable[Callable[[dict], bool]], mirror: dict) -> bool:
     """Filters the respective mirrors."""
 
-    return all(match_func(config, mirror) for match_func in MATCH_FUNCS)
+    return all(function(mirror) for function in functions)

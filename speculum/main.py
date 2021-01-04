@@ -7,7 +7,7 @@ from urllib.error import HTTPError, URLError
 from speculum.argparse import parse_args
 from speculum.config import Configuration
 from speculum.io import dump_mirrors, exiting, iterprint
-from speculum.filtering import match
+from speculum.filtering import get_filters, match
 from speculum.limiting import limit
 from speculum.logging import LOG_FORMAT, LOGGER
 from speculum.mirrors import SORTING_DEFAULTS
@@ -44,7 +44,8 @@ def main() -> int:
         return 0
 
     LOGGER.debug('Filtering mirrors.')
-    mirrors = filter(partial(match, config), mirrors)
+    filters = set(get_filters(config))
+    mirrors = filter(partial(match, filters), mirrors)
 
     if config.sort:
         LOGGER.debug('Sorting mirrors.')
