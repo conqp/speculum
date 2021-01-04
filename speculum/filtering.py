@@ -82,16 +82,16 @@ def get_filters(config: Configuration) -> Iterator[Callable[[dict], bool]]:
         yield lambda mirror: mirror.get('completion_pct') == 1
 
     if config.active:
-        yield lambda mirror: mirror.get('active')
+        yield lambda mirror: mirror.get('active', False)
 
     if config.ipv4:
-        yield lambda mirror: mirror.get('ipv4')
+        yield lambda mirror: mirror.get('ipv4', False)
 
     if config.ipv6:
-        yield lambda mirror: mirror.get('ipv6')
+        yield lambda mirror: mirror.get('ipv6', False)
 
     if config.isos:
-        yield lambda mirror: mirror.get('isos')
+        yield lambda mirror: mirror.get('isos', False)
 
 
 def match(functions: Iterable[Callable[[dict], bool]], mirror: dict) -> bool:
