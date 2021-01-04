@@ -9,7 +9,6 @@ from urllib.request import urlopen
 from speculum.config import Configuration
 from speculum.io import iterprint
 from speculum.logging import LOGGER
-from speculum.parsers import parse_datetime
 
 
 __all__ = ['SORTING_DEFAULTS', 'get_mirrors', 'get_lines', 'list_countries']
@@ -32,24 +31,22 @@ SORTING_DEFAULTS = {
 }
 
 
-def prepare_mirrors(mirrors: Iterable[dict]) -> Iterator[dict]:
-    """Sets ages on mirrors."""
-
-    now = datetime.now()
-    count = 0
+def valid_mirrors(mirrors: Iterator[dict]) -> Iterator[dict]:
+    """Yields valid mirrors."""
 
     for mirror in mirrors:
-        if not mirror.get('url'):
-            LOGGER.warning('Skipping mirror without URL.')
-            continue
-
-        if last_sync := mirror.get('last_sync'):
-            last_sync = parse_datetime(last_sync)
+        if mirror.get('url'):
+            yield mirror
         else:
-            last_sync = datetime.fromtimestamp(0)
+            LOGGER.warning('Skipping mirror without URL.')
 
-        mirror['age'] = now - last_sync
-        count += 1
+
+def counted_mirrors(mirrors: Iterator[dict]) -> Iterator[dict]:
+    """Yields and counts available mirrors."""
+
+    count = 0
+
+    for count, mirror in enumerate(valid_mirrors(mirrors), start=1):
         yield mirror
 
     LOGGER.debug('Received %i available mirrors.', count)
@@ -61,7 +58,7 @@ def get_mirrors() -> Iterator[dict]:
     with urlopen(MIRRORS_URL) as response:
         json = load(response)
 
-    return prepare_mirrors(json['urls'])
+    return counted_mirrors(json['urls'])
 
 
 def mirror_url(url: str) -> str:

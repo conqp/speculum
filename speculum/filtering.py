@@ -1,10 +1,12 @@
 """Filtering functions."""
 
+from datetime import datetime
 from functools import partial
 from re import Pattern
 from typing import Callable, Iterable, Iterator, List
 
 from speculum.config import Configuration
+from speculum.parsers import parse_datetime
 
 
 __all__ = ['get_filters', 'match']
@@ -33,11 +35,13 @@ def match_protocols(protocols: List[str], mirror: dict) -> bool:
     return False
 
 
-def match_max_age(max_age: int, mirror: dict) -> bool:
+def match_max_age(now: datetime, max_age: int, mirror: dict) -> bool:
     """Matches maximum age restrictions."""
 
-    if (age := mirror.get('age')) is not None:
-        return age <= max_age
+    if last_sync := mirror.get('last_sync'):
+        age = now - parse_datetime(last_sync)
+        hours = age.total_seconds() / 3600
+        return hours <= max_age
 
     return False
 
@@ -70,7 +74,7 @@ def get_filters(config: Configuration) -> Iterator[Callable[[dict], bool]]:
         yield partial(match_protocols, config.protocols)
 
     if config.max_age is not None:
-        yield partial(match_max_age, config.max_age)
+        yield partial(match_max_age, datetime.now(), config.max_age)
 
     if config.match is not None:
         yield partial(match_regex, config.match)
