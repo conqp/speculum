@@ -36,7 +36,7 @@ def match_protocols(protocols: List[str], mirror: dict) -> bool:
 def match_max_age(max_age: int, mirror: dict) -> bool:
     """Matches maximum age restrictions."""
 
-    if age := mirror.get('age') is not None:
+    if (age := mirror.get('age')) is not None:
         return age <= max_age
 
     return False
