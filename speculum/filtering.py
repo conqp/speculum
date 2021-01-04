@@ -46,7 +46,7 @@ def match_regex(pattern: Pattern, mirror: dict) -> bool:
     """Matches regular expressions."""
 
     if url := mirror.get('url'):
-        return pattern.search(url)
+        return bool(pattern.search(url))
 
     return False
 
@@ -55,7 +55,7 @@ def match_regex_inv(pattern: Pattern, mirror: dict) -> bool:
     """Negative matches regular expressions."""
 
     if url := mirror.get('url'):
-        return pattern.search(url)
+        return not pattern.search(url)
 
     return False
 
