@@ -1,14 +1,13 @@
 """Functions to parse data from command line arguments."""
 
 from configparser import ConfigParser
-from datetime import datetime, timedelta
+from datetime import datetime
 from re import error, compile, Pattern  # pylint: disable=W0622
 
 
 __all__ = [
     'cistring',
     'configfile',
-    'hours',
     'posint',
     'regex',
     'parse_datetime'
@@ -30,12 +29,6 @@ def configfile(filename: str) -> ConfigParser:
         return config_parser
 
     raise ValueError(f'Invalid or malformed config file: {filename}')
-
-
-def hours(string: str) -> timedelta:
-    """Returns a time delta for the given hours."""
-
-    return timedelta(hours=int(string))
 
 
 def parse_datetime(string: str) -> datetime:
