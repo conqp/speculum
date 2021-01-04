@@ -44,8 +44,7 @@ def main() -> int:
         return 0
 
     LOGGER.debug('Filtering mirrors.')
-    filters = set(get_filters(config))
-    mirrors = filter(partial(match, filters), mirrors)
+    mirrors = filter(partial(match, set(get_filters(config))), mirrors)
 
     if config.sort:
         LOGGER.debug('Sorting mirrors.')
