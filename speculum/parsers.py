@@ -21,15 +21,15 @@ def cistring(string: str) -> str:
     return string.casefold()
 
 
-def configfile(string: str) -> ConfigParser:
+def configfile(filename: str) -> ConfigParser:
     """Reads a configuration file."""
 
     config_parser = ConfigParser()
 
-    if config_parser.read(string):
+    if config_parser.read(filename):
         return config_parser
 
-    raise ValueError('Invalid or malformed config file: {string}')
+    raise ValueError(f'Invalid or malformed config file: {filename}')
 
 
 def hours(string: str) -> timedelta:
