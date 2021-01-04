@@ -29,15 +29,12 @@ def get_cistrings(parser: ConfigParser, section: str,
     return None
 
 
-def get_regex(parser: ConfigParser, section: str,
-              key: str) -> Optional[Pattern]:
-    """Returns a regular expression if available."""
+def get_hours(parser: ConfigParser, section: str,
+              key: str) -> Optional[timedelta]:
+    """Returns a timedelta of hours if available."""
 
-    if regex := parser.get(section, key, fallback=None):
-        try:
-            return compile(regex)
-        except error:
-            LOGGER.error('Invalid regular expression: %s', regex)
+    if (hours := parser.getint(section, key, fallback=None)) is not None:
+        return timedelta(hours=hours)
 
     return None
 
@@ -50,6 +47,19 @@ def get_path(parser: ConfigParser, section: str, key: str) -> Optional[Path]:
             return Path(path)
         except ValueError:
             LOGGER.error('Invalid path: %s', path)
+
+    return None
+
+
+def get_regex(parser: ConfigParser, section: str,
+              key: str) -> Optional[Pattern]:
+    """Returns a regular expression if available."""
+
+    if regex := parser.get(section, key, fallback=None):
+        try:
+            return compile(regex)
+        except error:
+            LOGGER.error('Invalid regular expression: %s', regex)
 
     return None
 
@@ -97,14 +107,12 @@ class Configuration(NamedTuple):
     @classmethod
     def from_parser(cls, parser: ConfigParser) -> Configuration:
         """Creates the configuration from the given args."""
-        max_age = parser.getint('filtering', 'max_age', fallback=None)
-
         return cls(
             get_cistrings(parser, 'sorting', 'sort'),
             parser.getboolean('sorting', 'reverse', fallback=False),
             get_cistrings(parser, 'filtering', 'countries'),
             get_cistrings(parser, 'filtering', 'protocols'),
-            None if max_age is None else timedelta(hours=max_age),
+            get_hours(parser, 'filtering', 'max_age'),
             get_regex(parser, 'filtering', 'match'),
             get_regex(parser, 'filtering', 'nomatch'),
             parser.getboolean('filtering', 'complete', fallback=False),

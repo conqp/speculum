@@ -26,8 +26,7 @@ SORTING_DEFAULTS = {
     'duration_stddev': float('inf'),
     'score': float('inf'),
     'country': '~',
-    'country_code': '~',
-    'age': None
+    'country_code': '~'
 }
 
 
