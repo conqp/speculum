@@ -34,7 +34,7 @@ def main() -> int:
 
     try:
         mirrors = get_mirrors()
-    except (HTTPError, URLError) as err:
+    except URLError as err:
         LOGGER.error('Could not download mirror list.')
         LOGGER.debug(err)
         return 2
