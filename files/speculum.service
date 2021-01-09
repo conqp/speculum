@@ -1,5 +1,5 @@
 [Unit]
-Description=Refresh Pacman mirrorlist with speculum
+Description=Update pacman mirrorlist
 Requires=network-online.target
 After=network-online.target
 

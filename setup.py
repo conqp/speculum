@@ -13,7 +13,7 @@ setup(
     author_email='mail@richard-neumann.de',
     python_requires='>=3.8',
     packages=['speculum'],
-    scripts=['files/speculum'],
+    entry_points={'console_scripts': ['speculum = speculum.main:main']},
     data_files=[
         ('/etc', ['files/speculum.conf']),
         ('/usr/lib/systemd/system', [

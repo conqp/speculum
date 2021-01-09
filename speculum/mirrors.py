@@ -2,14 +2,13 @@
 
 from datetime import datetime
 from json import load
-from typing import Iterable, Tuple
+from typing import Iterable, Iterator, Tuple
 from urllib.parse import urlparse, ParseResult
 from urllib.request import urlopen
 
 from speculum.config import Configuration
 from speculum.io import iterprint
 from speculum.logging import LOGGER
-from speculum.parsers import parse_datetime
 
 
 __all__ = ['SORTING_DEFAULTS', 'get_mirrors', 'get_lines', 'list_countries']
@@ -27,41 +26,38 @@ SORTING_DEFAULTS = {
     'duration_stddev': float('inf'),
     'score': float('inf'),
     'country': '~',
-    'country_code': '~',
-    'age': None
+    'country_code': '~'
 }
 
 
-def prepare_mirrors(mirrors: Iterable[dict]) -> Iterable[dict]:
-    """Sets ages on mirrors."""
-
-    now = datetime.now()
-    count = 0
+def valid_mirrors(mirrors: Iterator[dict]) -> Iterator[dict]:
+    """Yields valid mirrors."""
 
     for mirror in mirrors:
-        if not mirror.get('url'):
-            LOGGER.warning('Skipping mirror without URL.')
-            continue
-
-        if last_sync := mirror.get('last_sync'):
-            last_sync = parse_datetime(last_sync)
+        if mirror.get('url'):
+            yield mirror
         else:
-            last_sync = datetime.fromtimestamp(0)
+            LOGGER.warning('Skipping mirror without URL.')
 
-        mirror['age'] = now - last_sync
-        count += 1
+
+def counted_mirrors(mirrors: Iterator[dict]) -> Iterator[dict]:
+    """Yields and counts available mirrors."""
+
+    count = 0
+
+    for count, mirror in enumerate(valid_mirrors(mirrors), start=1):
         yield mirror
 
     LOGGER.debug('Received %i available mirrors.', count)
 
 
-def get_mirrors() -> Iterable[dict]:
+def get_mirrors() -> Iterator[dict]:
     """Returns the mirrors from the respective URL."""
 
     with urlopen(MIRRORS_URL) as response:
         json = load(response)
 
-    return prepare_mirrors(json['urls'])
+    return counted_mirrors(json['urls'])
 
 
 def mirror_url(url: str) -> str:
@@ -77,7 +73,7 @@ def mirror_url(url: str) -> str:
     return url.geturl()
 
 
-def get_lines(mirrors: Iterable[dict], config: Configuration) -> Iterable[str]:
+def get_lines(mirrors: Iterable[dict], config: Configuration) -> Iterator[str]:
     """Returns a mirror list record."""
 
     if config.header:
@@ -92,7 +88,7 @@ def get_lines(mirrors: Iterable[dict], config: Configuration) -> Iterable[str]:
         yield f'Server = {url}'
 
 
-def get_countries(mirrors: Iterable[dict]) -> Iterable[Tuple[str, str]]:
+def get_countries(mirrors: Iterable[dict]) -> Iterator[Tuple[str, str]]:
     """Yields available countries."""
 
     for mirror in mirrors:
@@ -102,8 +98,8 @@ def get_countries(mirrors: Iterable[dict]) -> Iterable[Tuple[str, str]]:
             yield (name, code)
 
 
-def list_countries(mirrors: Iterable[dict], reverse: bool = False) -> int:
+def list_countries(mirrors: Iterable[dict], reverse: bool = False) -> None:
     """Lists available countries."""
 
-    countries = sorted(get_countries(mirrors), reverse=reverse)
+    countries = sorted(set(get_countries(mirrors)), reverse=reverse)
     iterprint(f'{name} ({code})' for name, code in countries)
