@@ -4,7 +4,7 @@ from functools import wraps
 from os import linesep
 from pathlib import Path
 from sys import exit, stderr    # pylint: disable=W0622
-from typing import Any, Callable, Iterable
+from typing import Callable, Iterable
 
 from speculum.logging import LOGGER
 
@@ -27,7 +27,7 @@ def dump_mirrors(lines: Iterable[str], path: Path) -> bool:
     return True
 
 
-def exiting(function: Callable[..., Any]) -> Callable[..., Any]:
+def exiting(function: Callable[..., int]) -> Callable[..., None]:
     """Makes a function exit with the returned exit code."""
 
     @wraps(function)
