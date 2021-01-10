@@ -3,7 +3,7 @@
 from datetime import datetime
 from json import load
 from typing import Iterable, Iterator, Tuple
-from urllib.parse import urlparse, ParseResult
+from urllib.parse import urlparse, urlunparse
 from urllib.request import urlopen
 
 from speculum.config import Configuration
@@ -69,8 +69,7 @@ def mirror_url(url: str) -> str:
         path += '/'
 
     path += REPO_PATH
-    url = ParseResult(scheme, netloc, path, params, query, fragment)
-    return url.geturl()
+    return urlunparse((scheme, netloc, path, params, query, fragment))
 
 
 def get_lines(mirrors: Iterable[dict], config: Configuration) -> Iterator[str]:
