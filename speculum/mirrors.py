@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from json import load
-from typing import Iterable, Iterator, NamedTuple, Tuple
+from typing import Iterable, Iterator, NamedTuple, Set
 from urllib.parse import urlparse, urlunparse
 from urllib.request import urlopen
 
@@ -97,18 +97,21 @@ def get_lines(mirrors: Iterable[dict], config: Configuration) -> Iterator[str]:
         yield f'Server = {url}'
 
 
-def get_countries(mirrors: Iterable[dict]) -> Iterator[Tuple[str, str]]:
-    """Yields available countries."""
+def get_countries(mirrors: Iterable[dict]) -> Set[Country]:
+    """Returns available countries."""
+
+    countries = set()
 
     for mirror in mirrors:
         name, code = mirror.get('country'), mirror.get('country_code')
 
         if name and code:
-            yield Country(name, code)
+            countries.add(Country(name, code))
+
+    return countries
 
 
 def list_countries(mirrors: Iterable[dict], reverse: bool = False) -> None:
     """Lists available countries."""
 
-    countries = sorted(set(get_countries(mirrors)), reverse=reverse)
-    iterprint(map(str, countries))
+    iterprint(map(str, sorted(get_countries(mirrors), reverse=reverse)))
