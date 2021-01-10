@@ -2,7 +2,7 @@
 
 from functools import partial
 from logging import DEBUG, INFO, basicConfig
-from urllib.error import HTTPError, URLError
+from urllib.error import URLError
 
 from speculum.argparse import parse_args
 from speculum.config import Configuration
