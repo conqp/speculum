@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from json import load
-from typing import Iterable, Iterator, Tuple
+from typing import Iterable, Iterator, NamedTuple, Tuple
 from urllib.parse import urlparse, urlunparse
 from urllib.request import urlopen
 
@@ -28,6 +28,16 @@ SORTING_DEFAULTS = {
     'country': '~',
     'country_code': '~'
 }
+
+
+class Country(NamedTuple):
+    """Represents information about countries."""
+
+    name: str
+    code: str
+
+    def __str__(self):
+        return f'{self.name} ({self.code})'
 
 
 def valid_mirrors(mirrors: Iterator[dict]) -> Iterator[dict]:
@@ -94,11 +104,11 @@ def get_countries(mirrors: Iterable[dict]) -> Iterator[Tuple[str, str]]:
         name, code = mirror.get('country'), mirror.get('country_code')
 
         if name and mirror:
-            yield (name, code)
+            yield Country(name, code)
 
 
 def list_countries(mirrors: Iterable[dict], reverse: bool = False) -> None:
     """Lists available countries."""
 
     countries = sorted(set(get_countries(mirrors)), reverse=reverse)
-    iterprint(f'{name} ({code})' for name, code in countries)
+    iterprint(map(str, countries))
