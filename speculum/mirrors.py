@@ -103,7 +103,7 @@ def get_countries(mirrors: Iterable[dict]) -> Iterator[Tuple[str, str]]:
     for mirror in mirrors:
         name, code = mirror.get('country'), mirror.get('country_code')
 
-        if name and mirror:
+        if name and code:
             yield Country(name, code)
 
 
