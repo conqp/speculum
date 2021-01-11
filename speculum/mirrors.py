@@ -100,15 +100,12 @@ def get_lines(mirrors: Iterable[dict], config: Configuration) -> Iterator[str]:
 def get_countries(mirrors: Iterable[dict]) -> Set[Country]:
     """Returns available countries."""
 
-    countries = set()
-
-    for mirror in mirrors:
-        name, code = mirror.get('country'), mirror.get('country_code')
-
-        if name and code:
-            countries.add(Country(name, code))
-
-    return countries
+    return {
+        Country(name, code) for name, code in
+        map(lambda mirror: (mirror.get('country'), mirror.get('country_code')),
+            mirrors
+        ) if name and code
+    }
 
 
 def list_countries(mirrors: Iterable[dict], reverse: bool = False) -> None:
