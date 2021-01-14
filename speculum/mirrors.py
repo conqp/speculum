@@ -103,8 +103,7 @@ def get_countries(mirrors: Iterable[dict]) -> Set[Country]:
     return {
         Country(name, code) for name, code in
         map(lambda mirror: (mirror.get('country'), mirror.get('country_code')),
-            mirrors
-        ) if name and code
+            mirrors) if name and code
     }
 
 
