@@ -28,7 +28,7 @@ def get_sorting_key(sorting: Iterable[str], defaults: dict) -> Callable:
 
                 continue
 
-            if value := mirror.get(option) is not None:
+            if (value := mirror.get(option)) is not None:
                 key.append(value)
             else:
                 key.append(default)
