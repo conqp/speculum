@@ -6,7 +6,7 @@ from configparser import ConfigParser
 from datetime import timedelta
 from pathlib import Path
 from re import error, compile, Pattern  # pylint: disable=W0622
-from typing import Iterator, List, NamedTuple, Optional
+from typing import Iterator, NamedTuple, Optional
 
 from speculum.logging import LOGGER
 
@@ -15,7 +15,7 @@ __all__ = ['Configuration']
 
 
 def get_cistrings(parser: ConfigParser, section: str,
-                  key: str) -> Optional[List[str]]:
+                  key: str) -> list[str]:
     """Returns a list of casefold strings from
     the key in the section iff it is not empty.
     """
@@ -26,7 +26,7 @@ def get_cistrings(parser: ConfigParser, section: str,
 
         return [string.casefold() for string in string.split()]
 
-    return None
+    return []
 
 
 def get_hours(parser: ConfigParser, section: str,
@@ -67,10 +67,10 @@ def get_regex(parser: ConfigParser, section: str,
 class Configuration(NamedTuple):
     """Configuration settings for speculum."""
 
-    sort: List[str]
+    sort: list[str]
     reverse: bool
-    countries: List[str]
-    protocols: List[str]
+    countries: list[str]
+    protocols: list[str]
     max_age: timedelta
     match: Pattern
     nomatch: Pattern
