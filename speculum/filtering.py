@@ -3,7 +3,7 @@
 from datetime import datetime, timedelta
 from functools import partial
 from re import Pattern
-from typing import Callable, Iterable, Iterator, List
+from typing import Callable, Iterable, Iterator
 
 from speculum.config import Configuration
 from speculum.parsers import parse_datetime
@@ -12,7 +12,7 @@ from speculum.parsers import parse_datetime
 __all__ = ['get_filters', 'match']
 
 
-def match_country(countries: List[str], mirror: dict) -> bool:
+def match_country(countries: list[str], mirror: dict) -> bool:
     """Matches country names an codes."""
 
     if country := mirror.get('country'):
@@ -26,7 +26,7 @@ def match_country(countries: List[str], mirror: dict) -> bool:
     return False
 
 
-def match_protocols(protocols: List[str], mirror: dict) -> bool:
+def match_protocols(protocols: list[str], mirror: dict) -> bool:
     """Matches protocol restrictions."""
 
     if protocol := mirror.get('protocol'):

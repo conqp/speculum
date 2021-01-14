@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from json import load
-from typing import Iterable, Iterator, NamedTuple, Set
+from typing import Iterable, Iterator, NamedTuple
 from urllib.parse import urlparse, urlunparse
 from urllib.request import urlopen
 
@@ -97,7 +97,7 @@ def get_lines(mirrors: Iterable[dict], config: Configuration) -> Iterator[str]:
         yield f'Server = {url}'
 
 
-def get_countries(mirrors: Iterable[dict]) -> Set[Country]:
+def get_countries(mirrors: Iterable[dict]) -> set[Country]:
     """Returns available countries."""
 
     return {
