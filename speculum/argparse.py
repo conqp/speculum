@@ -3,7 +3,7 @@
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
 
-from speculum.parsers import configfile, hours, cistring, posint, regex
+from speculum.parsers import configfile, hours, posint, regex
 
 
 __all__ = ['parse_args']
@@ -32,15 +32,15 @@ def parse_args() -> Namespace:
         '-f', '--config', type=configfile, metavar='file',
         help='reads settings from the given config file')
     parser.add_argument(
-        '-s', '--sort', nargs='+', type=cistring, metavar='option',
+        '-s', '--sort', nargs='+', type=str.casefold, metavar='option',
         help='sort by the respective sort options')
     parser.add_argument(
         '-r', '--reverse', action='store_true', help='sort in reversed order')
     parser.add_argument(
-        '-c', '--countries', nargs='+', type=cistring, metavar='country',
+        '-c', '--countries', nargs='+', type=str.casefold, metavar='country',
         help='match mirrors of these countries')
     parser.add_argument(
-        '-p', '--protocols', nargs='+', type=cistring, metavar='protocol',
+        '-p', '--protocols', nargs='+', type=str.casefold, metavar='protocol',
         help='match mirrors that use one of the specified protocols')
     parser.add_argument(
         '-a', '--max-age', type=hours, metavar='hours',

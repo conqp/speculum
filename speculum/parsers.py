@@ -6,19 +6,12 @@ from re import error, compile, Pattern  # pylint: disable=W0622
 
 
 __all__ = [
-    'cistring',
     'configfile',
     'hours',
     'posint',
     'regex',
     'parse_datetime'
 ]
-
-
-def cistring(string: str) -> str:
-    """Returns a string with ignored case."""
-
-    return string.casefold()
 
 
 def configfile(filename: str) -> ConfigParser:
