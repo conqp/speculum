@@ -6,7 +6,7 @@ from urllib.error import URLError
 
 from speculum.argparse import parse_args
 from speculum.config import Configuration
-from speculum.io import dump_mirrors, exiting, iterprint
+from speculum.io import dump_mirrors, iterprint
 from speculum.filtering import get_filters, match
 from speculum.limiting import limit
 from speculum.logging import LOG_FORMAT, LOGGER
@@ -20,7 +20,6 @@ from speculum.sorting import get_sorting_key
 __all__ = ['main']
 
 
-@exiting
 def main() -> int:
     """Filters and sorts the mirrors."""
 
