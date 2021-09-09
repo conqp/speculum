@@ -14,8 +14,7 @@ from speculum.logging import LOGGER
 __all__ = ['Configuration']
 
 
-def get_cistrings(parser: ConfigParser, section: str,
-                  key: str) -> list[str]:
+def get_cistrings(parser: ConfigParser, section: str, key: str) -> list[str]:
     """Returns a list of casefold strings from
     the key in the section iff it is not empty.
     """
