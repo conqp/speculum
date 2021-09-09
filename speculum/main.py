@@ -54,14 +54,12 @@ def main() -> int:
         LOGGER.debug('Limiting mirrors.')
         mirrors = limit(mirrors, config.limit)
 
-    mirrors = tuple(mirrors)
-
-    if not mirrors and config.limit != 0:
+    if not (mirrors := list(mirrors)) and config.limit != 0:
         LOGGER.error('No mirrors found.')
         return 1
 
-    mirror_count = len(mirrors)
-    LOGGER.info('Mirror list contains %i mirrors.', mirror_count)
+    LOGGER.info('Mirror list contains %i mirrors.',
+                mirror_count := len(mirrors))
 
     if config.limit is not None and mirror_count < config.limit:
         LOGGER.warning('Filter yielded less mirrors than specified limit.')
