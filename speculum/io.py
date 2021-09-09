@@ -14,11 +14,9 @@ __all__ = ['dump_mirrors', 'iterprint']
 def dump_mirrors(lines: Iterable[str], path: Path) -> bool:
     """Dumps the mirrors to the given path."""
 
-    mirrorlist = linesep.join(lines)
-
     try:
         with path.open('w') as file:
-            file.write(mirrorlist + linesep)
+            file.write(linesep.join(lines) + linesep)
     except PermissionError as permission_error:
         LOGGER.error(permission_error)
         return False
