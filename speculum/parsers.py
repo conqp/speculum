@@ -17,9 +17,7 @@ __all__ = [
 def configfile(filename: str) -> ConfigParser:
     """Reads a configuration file."""
 
-    config_parser = ConfigParser()
-
-    if config_parser.read(filename):
+    if (config_parser := ConfigParser()).read(filename):
         return config_parser
 
     raise ValueError(f'Invalid or malformed config file: {filename}')
@@ -34,20 +32,13 @@ def hours(string: str) -> timedelta:
 def parse_datetime(string: str) -> datetime:
     """Parses a mirror's last_sync datetime stamp."""
 
-    try:
-        dtime = datetime.strptime(string, '%Y-%m-%dT%H:%M:%S.%fZ')
-    except ValueError:
-        dtime = datetime.strptime(string, '%Y-%m-%dT%H:%M:%SZ')
-
-    return dtime.replace(tzinfo=None)
+    return datetime.fromisoformat(string).replace(tzinfo=None)
 
 
 def posint(string: str) -> int:
     """Returns a positive integer."""
 
-    integer = int(string)
-
-    if integer > 0:
+    if (integer := int(string)) > 0:
         return integer
 
     raise ValueError('Integer must be greater than zero.')
