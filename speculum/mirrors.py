@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from json import load
-from typing import Iterable, Iterator, NamedTuple
+from typing import Iterable, Iterator, NamedTuple, Optional
 from urllib.parse import urlparse, urlunparse
 from urllib.request import urlopen
 
@@ -86,7 +86,8 @@ def get_lines(mirrors: Iterable[dict], config: Configuration) -> Iterator[str]:
     """Returns a mirror list record."""
 
     if config.header:
-        yield f'# Mirror list generated with speculum on {datetime.now()}'
+        timestamp = datetime.now().isoformat()
+        yield f'# Mirror list generated with speculum on {timestamp}'
         yield '# with configuration:'
 
         for line in config.lines():
@@ -97,14 +98,22 @@ def get_lines(mirrors: Iterable[dict], config: Configuration) -> Iterator[str]:
         yield f'Server = {url}'
 
 
+def get_country(mirror: dict) -> Optional[Country]:
+    """Returns the mirror's country."""
+
+    if not (country := mirror.get('country')):
+        return None
+
+    if not (code := mirror.get('country_code')):
+        return None
+
+    return Country(country, code)
+
+
 def get_countries(mirrors: Iterable[dict]) -> set[Country]:
     """Returns available countries."""
 
-    return {
-        Country(name, code) for name, code in
-        map(lambda mirror: (mirror.get('country'), mirror.get('country_code')),
-            mirrors) if name and code
-    }
+    return set(filter(None, map(get_country, mirrors)))
 
 
 def list_countries(mirrors: Iterable[dict], reverse: bool = False) -> None:
