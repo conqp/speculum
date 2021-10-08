@@ -32,6 +32,9 @@ def hours(string: str) -> timedelta:
 def parse_datetime(string: str) -> datetime:
     """Parses a mirror's last_sync datetime stamp."""
 
+    if string.endswith('Z'):
+        string = string[:-1]
+
     return datetime.fromisoformat(string).replace(tzinfo=None)
 
 
