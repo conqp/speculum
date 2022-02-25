@@ -9,7 +9,7 @@ from speculum.parsers import configfile, hours, posint
 __all__ = ['parse_args']
 
 
-DESCRIPTION = 'Yet another Arch Linux mirrorlist optimizer.'
+DESCRIPTION = 'Yet another Arch Linux mirror list optimizer.'
 
 
 def parse_args() -> Namespace:

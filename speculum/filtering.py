@@ -13,7 +13,7 @@ __all__ = ['get_filters', 'match']
 
 
 def match_country(countries: list[str], mirror: dict) -> bool:
-    """Matches country names an codes."""
+    """Matches country names or codes."""
 
     if country := mirror.get('country'):
         if country.casefold() in countries:
