@@ -5,7 +5,6 @@ from argparse import Namespace
 from configparser import ConfigParser
 from datetime import timedelta
 from pathlib import Path
-from re import error, compile, Pattern
 from typing import Iterator, NamedTuple, Optional
 
 from speculum.logging import LOGGER
@@ -49,19 +48,6 @@ def get_path(parser: ConfigParser, section: str, key: str) -> Optional[Path]:
             return Path(path)
         except ValueError:
             LOGGER.error('Invalid path: %s', path)
-
-    return None
-
-
-def get_regex(parser: ConfigParser, section: str,
-              key: str) -> Optional[Pattern]:
-    """Returns a regular expression if available."""
-
-    if regex := parser.get(section, key, fallback=None):
-        try:
-            return compile(regex)
-        except error:
-            LOGGER.error('Invalid regular expression: %s', regex)
 
     return None
 
