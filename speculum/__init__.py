@@ -1,1 +1,1 @@
-"""Yet another Arch Linux mirrorlist optimizer."""
+"""Yet another Arch Linux mirror list optimizer."""
