@@ -3,7 +3,7 @@
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
 
-from speculum.parsers import configfile, hours, posint
+from speculum.parsers import configfile, hours, positive_int
 
 
 __all__ = ['parse_args']
@@ -83,7 +83,7 @@ def parse_args() -> Namespace:
         help='match mirrors that host ISOs'
     )
     parser.add_argument(
-        '-l', '--limit', type=posint, metavar='n',
+        '-l', '--limit', type=positive_int, metavar='n',
         help='limit output to this amount of results'
     )
     parser.add_argument(

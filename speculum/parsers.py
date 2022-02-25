@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 __all__ = [
     'configfile',
     'hours',
-    'posint',
+    'positive_int',
     'parse_datetime'
 ]
 
@@ -36,7 +36,7 @@ def parse_datetime(string: str) -> datetime:
     return datetime.fromisoformat(string).replace(tzinfo=None)
 
 
-def posint(string: str) -> int:
+def positive_int(string: str) -> int:
     """Returns a positive integer."""
 
     if (integer := int(string)) > 0:
