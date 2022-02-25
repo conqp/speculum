@@ -14,7 +14,9 @@ from speculum.logging import LOGGER
 __all__ = ['Configuration']
 
 
-def get_cistrings(parser: ConfigParser, section: str, key: str) -> list[str]:
+def get_case_folded_strings(
+        parser: ConfigParser, section: str, key: str
+) -> list[str]:
     """Returns a list of case-folded strings from
     the key in the section iff it is not empty.
     """
@@ -28,8 +30,9 @@ def get_cistrings(parser: ConfigParser, section: str, key: str) -> list[str]:
     return []
 
 
-def get_hours(parser: ConfigParser, section: str,
-              key: str) -> Optional[timedelta]:
+def get_hours(
+        parser: ConfigParser, section: str, key: str
+) -> Optional[timedelta]:
     """Returns a timedelta of hours if available."""
 
     if (hours := parser.getint(section, key, fallback=None)) is not None:
@@ -107,10 +110,10 @@ class Configuration(NamedTuple):
     def from_parser(cls, parser: ConfigParser) -> Configuration:
         """Creates the configuration from the given args."""
         return cls(
-            get_cistrings(parser, 'sorting', 'sort'),
+            get_case_folded_strings(parser, 'sorting', 'sort'),
             parser.getboolean('sorting', 'reverse', fallback=False),
-            get_cistrings(parser, 'filtering', 'countries'),
-            get_cistrings(parser, 'filtering', 'protocols'),
+            get_case_folded_strings(parser, 'filtering', 'countries'),
+            get_case_folded_strings(parser, 'filtering', 'protocols'),
             get_hours(parser, 'filtering', 'max_age'),
             parser.get('filtering', 'match'),
             parser.get('filtering', 'nomatch'),
