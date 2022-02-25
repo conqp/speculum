@@ -15,7 +15,7 @@ __all__ = ['Configuration']
 
 
 def get_cistrings(parser: ConfigParser, section: str, key: str) -> list[str]:
-    """Returns a list of casefold strings from
+    """Returns a list of case-folded strings from
     the key in the section iff it is not empty.
     """
 
