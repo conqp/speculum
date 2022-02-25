@@ -71,8 +71,8 @@ class Configuration(NamedTuple):
     countries: list[str]
     protocols: list[str]
     max_age: timedelta
-    match: Pattern
-    nomatch: Pattern
+    match: str
+    nomatch: str
     complete: bool
     active: bool
     ipv4: bool
@@ -112,8 +112,8 @@ class Configuration(NamedTuple):
             get_cistrings(parser, 'filtering', 'countries'),
             get_cistrings(parser, 'filtering', 'protocols'),
             get_hours(parser, 'filtering', 'max_age'),
-            get_regex(parser, 'filtering', 'match'),
-            get_regex(parser, 'filtering', 'nomatch'),
+            parser.get('filtering', 'match'),
+            parser.get('filtering', 'nomatch'),
             parser.getboolean('filtering', 'complete', fallback=False),
             parser.getboolean('filtering', 'active', fallback=False),
             parser.getboolean('filtering', 'ipv4', fallback=False),

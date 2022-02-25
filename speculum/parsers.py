@@ -2,14 +2,12 @@
 
 from configparser import ConfigParser
 from datetime import datetime, timedelta
-from re import error, compile, Pattern  # pylint: disable=W0622
 
 
 __all__ = [
     'configfile',
     'hours',
     'posint',
-    'regex',
     'parse_datetime'
 ]
 
@@ -45,12 +43,3 @@ def posint(string: str) -> int:
         return integer
 
     raise ValueError('Integer must be greater than zero.')
-
-
-def regex(string: str) -> Pattern:
-    """Returns a regular expression."""
-
-    try:
-        return compile(string)
-    except error as err:
-        raise ValueError(str(err)) from None

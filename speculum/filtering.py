@@ -2,7 +2,7 @@
 
 from datetime import datetime, timedelta
 from functools import partial
-from re import Pattern
+from re import search
 from typing import Callable, Iterable, Iterator
 
 from speculum.config import Configuration
@@ -44,20 +44,20 @@ def match_max_age(now: datetime, max_age: timedelta, mirror: dict) -> bool:
     return False
 
 
-def match_regex(pattern: Pattern, mirror: dict) -> bool:
+def match_regex(pattern: str, mirror: dict) -> bool:
     """Matches regular expressions."""
 
     if url := mirror.get('url'):
-        return bool(pattern.search(url))
+        return bool(search(pattern, url))
 
     return False
 
 
-def match_regex_inv(pattern: Pattern, mirror: dict) -> bool:
+def match_regex_inv(pattern: str, mirror: dict) -> bool:
     """Negative matches regular expressions."""
 
     if url := mirror.get('url'):
-        return not pattern.search(url)
+        return not search(pattern, url)
 
     return False
 

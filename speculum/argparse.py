@@ -3,7 +3,7 @@
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
 
-from speculum.parsers import configfile, hours, posint, regex
+from speculum.parsers import configfile, hours, posint
 
 
 __all__ = ['parse_args']
@@ -46,10 +46,10 @@ def parse_args() -> Namespace:
         '-a', '--max-age', type=hours, metavar='hours',
         help='match mirrors that are not older that the specified age')
     parser.add_argument(
-        '-m', '--match', type=regex, metavar='regex',
+        '-m', '--match', metavar='regex',
         help='match mirrors that match the regular expression')
     parser.add_argument(
-        '-n', '--nomatch', type=regex, metavar='regex',
+        '-n', '--nomatch', metavar='regex',
         help='exclude mirrors that match the regular expression')
     parser.add_argument(
         '-t', '--complete', action='store_true',
