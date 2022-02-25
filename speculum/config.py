@@ -131,6 +131,6 @@ class Configuration(NamedTuple):
 
     def lines(self, none: bool = False) -> Iterator[str]:
         """Yield lines of keys and values."""
-        for key, value in self._asdict().items():   # pylint: disable=E1101
+        for key, value in self._asdict().items():
             if none or value is not None:
                 yield f'{key} = {value}'
