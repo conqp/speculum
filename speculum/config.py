@@ -5,7 +5,7 @@ from argparse import Namespace
 from configparser import ConfigParser
 from datetime import timedelta
 from pathlib import Path
-from re import error, compile, Pattern  # pylint: disable=W0622
+from re import error, compile, Pattern
 from typing import Iterator, NamedTuple, Optional
 
 from speculum.logging import LOGGER
