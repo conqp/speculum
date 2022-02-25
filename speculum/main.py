@@ -6,7 +6,7 @@ from urllib.error import URLError
 
 from speculum.argparse import parse_args
 from speculum.config import Configuration
-from speculum.io import dump_mirrors, iterprint
+from speculum.io import dump_mirrors, print_items
 from speculum.filtering import get_filters, match
 from speculum.limiting import limit
 from speculum.logging import LOG_FORMAT, LOGGER
@@ -28,7 +28,7 @@ def main() -> int:
     config = Configuration.load(args)
 
     if args.list_sortopts:
-        iterprint(sorted(SORTING_DEFAULTS.keys(), reverse=config.reverse))
+        print_items(sorted(SORTING_DEFAULTS.keys(), reverse=config.reverse))
         return 0
 
     try:
@@ -70,5 +70,5 @@ def main() -> int:
         LOGGER.debug('Writing mirror list to "%s".', config.output)
         return 0 if dump_mirrors(lines, config.output) else 3
 
-    iterprint(lines)
+    print_items(lines)
     return 0

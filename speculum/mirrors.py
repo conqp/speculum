@@ -7,7 +7,7 @@ from urllib.parse import urlparse, urlunparse
 from urllib.request import urlopen
 
 from speculum.config import Configuration
-from speculum.io import iterprint
+from speculum.io import print_items
 from speculum.logging import LOGGER
 
 
@@ -119,4 +119,4 @@ def get_countries(mirrors: Iterable[dict]) -> set[Country]:
 def list_countries(mirrors: Iterable[dict], reverse: bool = False) -> None:
     """Lists available countries."""
 
-    iterprint(map(str, sorted(get_countries(mirrors), reverse=reverse)))
+    print_items(map(str, sorted(get_countries(mirrors), reverse=reverse)))

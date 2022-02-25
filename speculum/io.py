@@ -8,7 +8,7 @@ from typing import Iterable
 from speculum.logging import LOGGER
 
 
-__all__ = ['dump_mirrors', 'iterprint']
+__all__ = ['dump_mirrors', 'print_items']
 
 
 def dump_mirrors(lines: Iterable[str], path: Path) -> bool:
@@ -24,7 +24,7 @@ def dump_mirrors(lines: Iterable[str], path: Path) -> bool:
     return True
 
 
-def iterprint(items: Iterable[str]):
+def print_items(items: Iterable[str]):
     """Prints the items one by one, catching BrokenPipeErrors so
     that output can be handled by head, tail or similar programs.
     """
