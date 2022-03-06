@@ -1,12 +1,12 @@
 """Limiting of mirrors."""
 
-from typing import Iterable, Iterator, Optional
+from typing import Iterable, Iterator
 
 
 __all__ = ['limit']
 
 
-def limit(mirrors: Iterable[dict], maximum: Optional[int]) -> Iterator[dict]:
+def limit(mirrors: Iterable[dict], maximum: int | None) -> Iterator[dict]:
     """Yields mirrors up to the specified maximum."""
 
     for count, mirror in enumerate(mirrors, start=1):

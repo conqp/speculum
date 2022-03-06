@@ -5,7 +5,7 @@ from argparse import Namespace
 from configparser import ConfigParser
 from datetime import timedelta
 from pathlib import Path
-from typing import Iterator, NamedTuple, Optional
+from typing import Iterator, NamedTuple
 
 from speculum.logging import LOGGER
 
@@ -14,7 +14,9 @@ __all__ = ['Configuration']
 
 
 def get_case_folded_strings(
-        parser: ConfigParser, section: str, key: str
+        parser: ConfigParser,
+        section: str,
+        key: str
 ) -> list[str]:
     """Returns a list of case-folded strings from
     the key in the section iff it is not empty.
@@ -30,8 +32,10 @@ def get_case_folded_strings(
 
 
 def get_hours(
-        parser: ConfigParser, section: str, key: str
-) -> Optional[timedelta]:
+        parser: ConfigParser,
+        section: str,
+        key: str
+) -> timedelta | None:
     """Returns a timedelta of hours if available."""
 
     if (hours := parser.getint(section, key, fallback=None)) is not None:
@@ -40,7 +44,7 @@ def get_hours(
     return None
 
 
-def get_path(parser: ConfigParser, section: str, key: str) -> Optional[Path]:
+def get_path(parser: ConfigParser, section: str, key: str) -> Path | None:
     """Returns a path if available."""
 
     if path := parser.get(section, key, fallback=None):

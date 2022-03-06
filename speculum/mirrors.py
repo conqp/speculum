@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from json import load
-from typing import Iterable, Iterator, NamedTuple, Optional
+from typing import Iterable, Iterator, NamedTuple
 from urllib.parse import urlparse, urlunparse
 from urllib.request import urlopen
 
@@ -98,7 +98,7 @@ def get_lines(mirrors: Iterable[dict], config: Configuration) -> Iterator[str]:
         yield f'Server = {url}'
 
 
-def get_country(mirror: dict) -> Optional[Country]:
+def get_country(mirror: dict) -> Country | None:
     """Returns the mirror's country."""
 
     if not (country := mirror.get('country')):
