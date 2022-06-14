@@ -20,11 +20,12 @@ def parse_args() -> Namespace:
         '-v', '--verbose', action='store_true',
         help='enable more detailed logging'
     )
-    parser.add_argument(
+    meg = parser.add_mutually_exclusive_group()
+    meg.add_argument(
         '-S', '--list-sortopts', action='store_true',
         help='list the available sorting options'
     )
-    parser.add_argument(
+    meg.add_argument(
         '-C', '--list-countries', action='store_true',
         help='list the available countries'
     )
@@ -90,9 +91,4 @@ def parse_args() -> Namespace:
         '-o', '--output', type=Path, metavar='file',
         help='write the output to the specified file instead of stdout'
     )
-    args = parser.parse_args()
-
-    if args.list_sortopts and args.list_countries:
-        parser.error('Listing of options and countries is mutually exclusive.')
-
-    return args
+    return parser.parse_args()
