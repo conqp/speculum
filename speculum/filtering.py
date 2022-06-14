@@ -44,22 +44,16 @@ def match_max_age(now: datetime, max_age: timedelta, mirror: dict) -> bool:
     return False
 
 
-def match_regex(pattern: str, mirror: dict) -> bool:
+def match_regex(pattern: str, mirror: dict, *, inverse: bool = False) -> bool:
     """Matches regular expressions."""
 
-    if url := mirror.get('url'):
-        return bool(search(pattern, url))
+    if not (url := mirror.get('url')):
+        return False
 
-    return False
-
-
-def match_regex_inv(pattern: str, mirror: dict) -> bool:
-    """Negative matches regular expressions."""
-
-    if url := mirror.get('url'):
+    if inverse:
         return not search(pattern, url)
 
-    return False
+    return bool(search(pattern, url))
 
 
 def get_filters(config: Configuration) -> Iterator[Callable[[dict], bool]]:
@@ -78,7 +72,7 @@ def get_filters(config: Configuration) -> Iterator[Callable[[dict], bool]]:
         yield partial(match_regex, config.match)
 
     if config.nomatch is not None:
-        yield partial(match_regex_inv, config.nomatch)
+        yield partial(match_regex, config.nomatch, inverse=True)
 
     if config.complete:
         yield lambda mirror: mirror.get('completion_pct') == 1
