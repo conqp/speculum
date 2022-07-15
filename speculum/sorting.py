@@ -1,6 +1,6 @@
 """Sorting functions."""
 
-from typing import Callable, Iterable
+from typing import Any, Callable, Iterable
 
 from speculum.logging import LOGGER
 
@@ -8,7 +8,10 @@ from speculum.logging import LOGGER
 __all__ = ['get_sorting_key']
 
 
-def get_sorting_key(sorting: Iterable[str], defaults: dict) -> Callable:
+def get_sorting_key(
+        sorting: Iterable[str],
+        defaults: dict
+) -> Callable[[dict], tuple[Any, ...]]:
     """Returns a sorting key function for the given sorting options."""
 
     warned = set()
