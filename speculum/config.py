@@ -63,7 +63,7 @@ class Configuration(NamedTuple):
     reverse: bool
     countries: list[str]
     protocols: list[str]
-    max_age: timedelta
+    max_age: timedelta | None
     match: str | None
     nomatch: str | None
     complete: bool
