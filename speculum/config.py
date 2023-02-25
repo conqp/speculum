@@ -64,16 +64,16 @@ class Configuration(NamedTuple):
     countries: list[str]
     protocols: list[str]
     max_age: timedelta
-    match: str
-    nomatch: str
+    match: str | None
+    nomatch: str | None
     complete: bool
     active: bool
     ipv4: bool
     ipv6: bool
     isos: bool
-    limit: int
+    limit: int | None
     header: bool
-    output: Path
+    output: Path | None
 
     @classmethod
     def from_args(cls, args: Namespace) -> Configuration:
@@ -105,8 +105,8 @@ class Configuration(NamedTuple):
             get_case_folded_strings(parser, 'filtering', 'countries'),
             get_case_folded_strings(parser, 'filtering', 'protocols'),
             get_hours(parser, 'filtering', 'max_age'),
-            parser.get('filtering', 'match'),
-            parser.get('filtering', 'nomatch'),
+            parser.get('filtering', 'match', fallback=None),
+            parser.get('filtering', 'nomatch', fallback=None),
             parser.getboolean('filtering', 'complete', fallback=False),
             parser.getboolean('filtering', 'active', fallback=False),
             parser.getboolean('filtering', 'ipv4', fallback=False),
