@@ -59,10 +59,10 @@ def match_regex(pattern: str, mirror: dict, *, inverse: bool = False) -> bool:
 def get_filters(config: Configuration) -> Iterator[Callable[[dict], bool]]:
     """Yields functions to match the given mirror."""
 
-    if config.countries is not None:
+    if config.countries:
         yield partial(match_country, config.countries)
 
-    if config.protocols is not None:
+    if config.protocols:
         yield partial(match_protocols, config.protocols)
 
     if config.max_age is not None:
