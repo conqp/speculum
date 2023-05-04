@@ -14,13 +14,6 @@ setup(
     python_requires='>=3.8',
     packages=['speculum'],
     entry_points={'console_scripts': ['speculum = speculum.main:main']},
-    data_files=[
-        ('/etc', ['files/speculum.conf']),
-        ('/usr/lib/systemd/system', [
-            'files/speculum.service',
-            'files/speculum.timer'
-        ])
-    ],
     url='https://github.com/conqp/speculum',
     license='GPLv3',
     description='Yet another Arch Linux mirror list optimizer.',
