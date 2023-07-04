@@ -17,7 +17,7 @@ from speculum.mirrors import list_countries
 from speculum.sorting import get_sorting_key
 
 
-__all__ = ['main']
+__all__ = ["main"]
 
 
 def main() -> int:
@@ -34,7 +34,7 @@ def main() -> int:
     try:
         mirrors = get_mirrors()
     except URLError as err:
-        LOGGER.error('Could not download mirror list.')
+        LOGGER.error("Could not download mirror list.")
         LOGGER.debug(err)
         return 2
 
@@ -42,29 +42,26 @@ def main() -> int:
         list_countries(mirrors, reverse=config.reverse)
         return 0
 
-    LOGGER.debug('Filtering mirrors.')
+    LOGGER.debug("Filtering mirrors.")
     mirrors = filter(partial(match, set(get_filters(config))), mirrors)
 
     if config.sort:
-        LOGGER.debug('Sorting mirrors.')
+        LOGGER.debug("Sorting mirrors.")
         key = get_sorting_key(config.sort, SORTING_DEFAULTS)
         mirrors = sorted(mirrors, key=key, reverse=config.reverse)
 
     if config.limit:
-        LOGGER.debug('Limiting mirrors.')
+        LOGGER.debug("Limiting mirrors.")
         mirrors = limit(mirrors, config.limit)
 
     if not (mirrors := list(mirrors)) and config.limit != 0:
-        LOGGER.error('No mirrors found.')
+        LOGGER.error("No mirrors found.")
         return 1
 
-    LOGGER.info(
-        'Mirror list contains %i mirrors.',
-        mirror_count := len(mirrors)
-    )
+    LOGGER.info("Mirror list contains %i mirrors.", mirror_count := len(mirrors))
 
     if config.limit is not None and mirror_count < config.limit:
-        LOGGER.warning('Filter yielded less mirrors than specified limit.')
+        LOGGER.warning("Filter yielded less mirrors than specified limit.")
 
     lines = get_lines(mirrors, config)
 

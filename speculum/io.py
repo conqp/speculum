@@ -8,14 +8,14 @@ from typing import Iterable
 from speculum.logging import LOGGER
 
 
-__all__ = ['dump_mirrors', 'print_items']
+__all__ = ["dump_mirrors", "print_items"]
 
 
 def dump_mirrors(lines: Iterable[str], path: Path) -> bool:
     """Dumps the mirrors to the given path."""
 
     try:
-        with path.open('w') as file:
+        with path.open("w") as file:
             file.write(linesep.join(lines) + linesep)
     except PermissionError as permission_error:
         LOGGER.error(permission_error)

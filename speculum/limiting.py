@@ -3,7 +3,7 @@
 from typing import Iterable, Iterator
 
 
-__all__ = ['limit']
+__all__ = ["limit"]
 
 
 def limit(mirrors: Iterable[dict], maximum: int | None) -> Iterator[dict]:
