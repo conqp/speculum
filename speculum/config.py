@@ -10,32 +10,24 @@ from typing import Iterator, NamedTuple
 from speculum.logging import LOGGER
 
 
-__all__ = ['Configuration']
+__all__ = ["Configuration"]
 
 
-def get_case_folded_strings(
-        parser: ConfigParser,
-        section: str,
-        key: str
-) -> list[str]:
+def get_case_folded_strings(parser: ConfigParser, section: str, key: str) -> list[str]:
     """Returns a list of case-folded strings from
     the key in the section iff it is not empty.
     """
 
     if string := parser.get(section, key, fallback=None):
-        if ',' in string:
-            return [string.strip().casefold() for string in string.split(',')]
+        if "," in string:
+            return [string.strip().casefold() for string in string.split(",")]
 
         return [string.casefold() for string in string.split()]
 
     return []
 
 
-def get_hours(
-        parser: ConfigParser,
-        section: str,
-        key: str
-) -> timedelta | None:
+def get_hours(parser: ConfigParser, section: str, key: str) -> timedelta | None:
     """Returns a timedelta of hours if available."""
 
     if (hours := parser.getint(section, key, fallback=None)) is not None:
@@ -51,7 +43,7 @@ def get_path(parser: ConfigParser, section: str, key: str) -> Path | None:
         try:
             return Path(path)
         except ValueError:
-            LOGGER.error('Invalid path: %s', path)
+            LOGGER.error("Invalid path: %s", path)
 
     return None
 
@@ -93,28 +85,28 @@ class Configuration(NamedTuple):
             args.isos,
             args.limit,
             args.header,
-            args.output
+            args.output,
         )
 
     @classmethod
     def from_parser(cls, parser: ConfigParser) -> Configuration:
         """Creates the configuration from the given args."""
         return cls(
-            get_case_folded_strings(parser, 'sorting', 'sort'),
-            parser.getboolean('sorting', 'reverse', fallback=False),
-            get_case_folded_strings(parser, 'filtering', 'countries'),
-            get_case_folded_strings(parser, 'filtering', 'protocols'),
-            get_hours(parser, 'filtering', 'max_age'),
-            parser.get('filtering', 'match', fallback=None),
-            parser.get('filtering', 'nomatch', fallback=None),
-            parser.getboolean('filtering', 'complete', fallback=False),
-            parser.getboolean('filtering', 'active', fallback=False),
-            parser.getboolean('filtering', 'ipv4', fallback=False),
-            parser.getboolean('filtering', 'ipv6', fallback=False),
-            parser.getboolean('filtering', 'isos', fallback=False),
-            parser.getint('output', 'limit', fallback=None),
-            parser.getboolean('output', 'header', fallback=False),
-            get_path(parser, 'output', 'file')
+            get_case_folded_strings(parser, "sorting", "sort"),
+            parser.getboolean("sorting", "reverse", fallback=False),
+            get_case_folded_strings(parser, "filtering", "countries"),
+            get_case_folded_strings(parser, "filtering", "protocols"),
+            get_hours(parser, "filtering", "max_age"),
+            parser.get("filtering", "match", fallback=None),
+            parser.get("filtering", "nomatch", fallback=None),
+            parser.getboolean("filtering", "complete", fallback=False),
+            parser.getboolean("filtering", "active", fallback=False),
+            parser.getboolean("filtering", "ipv4", fallback=False),
+            parser.getboolean("filtering", "ipv6", fallback=False),
+            parser.getboolean("filtering", "isos", fallback=False),
+            parser.getint("output", "limit", fallback=None),
+            parser.getboolean("output", "header", fallback=False),
+            get_path(parser, "output", "file"),
         )
 
     @classmethod
@@ -137,4 +129,4 @@ class Configuration(NamedTuple):
         """Yield lines of keys and values."""
         for key, value in self._asdict().items():
             if none or value is not None:
-                yield f'{key} = {value}'
+                yield f"{key} = {value}"
