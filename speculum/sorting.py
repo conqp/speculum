@@ -30,7 +30,10 @@ def get_sorting_key(
 
                 continue
 
-            key.append(mirror.get(option, default))
+            if (value := mirror.get(option)) is not None:
+                key.append(value)
+            else:
+                key.append(default)
 
         return tuple(key)
 
