@@ -2,11 +2,10 @@ use chrono::{DateTime, FixedOffset};
 use serde::Deserialize;
 use url::Url;
 
-pub use self::country::Country;
 pub use self::duration::Duration;
 pub use self::protocol::Protocol;
+pub use crate::country::Country;
 
-mod country;
 mod duration;
 mod protocol;
 
@@ -23,8 +22,8 @@ pub struct Mirror {
     duration: Option<Duration>,
     score: Option<f64>,
     active: bool,
-    #[serde(flatten)]
-    country: Country<String>,
+    country: String,
+    country_code: String,
     isos: bool,
     ipv4: bool,
     ipv6: bool,
@@ -32,47 +31,64 @@ pub struct Mirror {
 }
 
 impl Mirror {
-    pub fn url(&self) -> &Url {
+    /// Return the mirror's URL.
+    #[must_use]
+    pub const fn url(&self) -> &Url {
         &self.url
     }
 
-    pub fn protocol(&self) -> Protocol {
+    /// Return the used protocol.
+    #[must_use]
+    pub const fn protocol(&self) -> Protocol {
         self.protocol
     }
 
-    pub fn last_sync(&self) -> Option<DateTime<FixedOffset>> {
+    /// Return the date and time of last sync, if any.
+    #[must_use]
+    pub const fn last_sync(&self) -> Option<DateTime<FixedOffset>> {
         self.last_sync
     }
 
-    pub fn completion_pct(&self) -> Option<f64> {
+    /// Return the completion percentage if any.
+    #[must_use]
+    pub const fn completion_pct(&self) -> Option<f64> {
         self.completion_pct
     }
 
-    pub fn delay(&self) -> Option<u64> {
+    /// Return the delay, if any.
+    #[must_use]
+    pub const fn delay(&self) -> Option<u64> {
         self.delay
     }
 
-    pub fn score(&self) -> Option<f64> {
+    /// Return the score, if any.
+    #[must_use]
+    pub const fn score(&self) -> Option<f64> {
         self.score
     }
 
-    pub fn country(&self) -> &Country<String> {
-        &self.country
+    /// Return the country.
+    pub fn country(&self) -> Result<Country, String> {
+        self.country_code.parse()
     }
 
-    pub fn isos(&self) -> bool {
+    #[must_use]
+    pub const fn isos(&self) -> bool {
         self.isos
     }
 
-    pub fn ipv4(&self) -> bool {
+    #[must_use]
+    pub const fn ipv4(&self) -> bool {
         self.ipv4
     }
 
-    pub fn ipv6(&self) -> bool {
+    #[must_use]
+    pub const fn ipv6(&self) -> bool {
         self.ipv6
     }
 
-    pub fn details(&self) -> &Url {
+    #[must_use]
+    pub const fn details(&self) -> &Url {
         &self.details
     }
 }
