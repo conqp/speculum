@@ -3,7 +3,6 @@ use reqwest::{IntoUrl, get};
 use serde::Deserialize;
 
 pub use self::mirror::Mirror;
-use crate::URL;
 
 mod mirror;
 
@@ -63,6 +62,6 @@ impl Mirrors {
     where
         T: IntoUrl,
     {
-        get(URL).await?.error_for_status()?.json().await
+        get(url).await?.error_for_status()?.json().await
     }
 }
