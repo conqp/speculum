@@ -2,7 +2,7 @@ use chrono::{DateTime, FixedOffset};
 use reqwest::{IntoUrl, get};
 use serde::Deserialize;
 
-pub use self::mirror::Mirror;
+pub use self::mirror::{Country, Duration, Mirror, Protocol};
 
 mod mirror;
 
