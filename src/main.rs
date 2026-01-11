@@ -5,9 +5,11 @@ use std::process::ExitCode;
 
 use log::{debug, error};
 
-use crate::mirrors::Mirrors;
+use crate::countries::Countries;
+use crate::mirrors::{Country, Mirrors};
 
 mod args;
+mod countries;
 mod filter;
 mod mirrors;
 
@@ -27,7 +29,13 @@ async fn main() -> ExitCode {
         return ExitCode::FAILURE;
     };
 
-    println!("{mirrors:?}");
+    for mirror in mirrors
+        .urls()
+        .iter()
+        .filter(|mirror| mirror.country() == &Country::from(Countries::Germany))
+    {
+        println!("{mirror:?}");
+    }
 
     ExitCode::SUCCESS
 }
