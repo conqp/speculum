@@ -14,18 +14,11 @@ pub enum Action {
         #[clap(subcommand)]
         target: ListTarget,
     },
-    Rank(RankArgs),
+    Rank {},
 }
 
 #[derive(Clone, Debug, Subcommand)]
 pub enum ListTarget {
     Countries,
     SortingOptions,
-}
-
-#[derive(Clone, Debug, clap::Args)]
-pub struct RankArgs {
-    #[clap(long, short)]
-    pub(crate) filter: Filter,
-    pub(crate) threshold_milliseconds: u64,
 }

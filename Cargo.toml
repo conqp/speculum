@@ -4,11 +4,14 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+chrono = { version = "0.4.42", features = ["serde"] }
 clap = { version = "4.5.54", features = ["derive"] }
 env_logger = "0.11.8"
 log = "0.4.29"
-reqwest = "0.13.1"
+reqwest = { version = "0.13.1", features = ["json"] }
 tokio = { version = "1.49.0", features = ["rt", "rt-multi-thread", "macros"] }
+serde = { version = "1.0.228", features = ["derive"] }
+url = { version = "2.5.8", features = ["serde"] }
 
 [profile.release]
 strip = true
