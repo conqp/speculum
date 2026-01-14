@@ -8,10 +8,10 @@ use serde::Deserialize;
 use tokio::time::Instant;
 use url::Url;
 
+use self::measured_mirror::MeasuredMirror;
 pub use self::measurement_error::MeasurementError;
 pub use self::protocol::Protocol;
 pub use crate::country::Country;
-use crate::mirrors::mirror::measured_mirror::MeasuredMirror;
 
 mod measured_mirror;
 mod measurement_error;
