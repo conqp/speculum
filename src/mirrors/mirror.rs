@@ -1,13 +1,23 @@
+use std::time::Duration;
+
 use chrono::{DateTime, FixedOffset};
+use clap::ValueEnum;
+use log::error;
+use reqwest::get;
 use serde::Deserialize;
+use tokio::time::Instant;
 use url::Url;
 
-pub use self::duration::Duration;
+pub use self::measurement_error::MeasurementError;
 pub use self::protocol::Protocol;
 pub use crate::country::Country;
+use crate::mirrors::mirror::measured_mirror::MeasuredMirror;
 
-mod duration;
+mod measured_mirror;
+mod measurement_error;
 mod protocol;
+
+const EXTRA_DB_PATH: &str = "extra/os/x86_64/extra.db";
 
 /// Information about a single mirror.
 #[expect(clippy::struct_excessive_bools)]
@@ -18,8 +28,8 @@ pub struct Mirror {
     last_sync: Option<DateTime<FixedOffset>>,
     completion_pct: Option<f64>,
     delay: Option<u64>,
-    #[serde(flatten)]
-    duration: Option<Duration>,
+    duration_avg: Option<f64>,
+    duration_stddev: Option<f64>,
     score: Option<f64>,
     active: bool,
     country: String,
@@ -61,6 +71,18 @@ impl Mirror {
         self.delay
     }
 
+    /// Return the average duration, if any.
+    #[must_use]
+    pub const fn duration_avg(&self) -> Option<f64> {
+        self.duration_avg
+    }
+
+    /// Return the standard deviation of the duration, if any.
+    #[must_use]
+    pub const fn duration_stddev(&self) -> Option<f64> {
+        self.duration_stddev
+    }
+
     /// Return the score, if any.
     #[must_use]
     pub const fn score(&self) -> Option<f64> {
@@ -69,7 +91,7 @@ impl Mirror {
 
     /// Return the country.
     pub fn country(&self) -> Result<Country, String> {
-        self.country_code.parse()
+        ValueEnum::from_str(&self.country_code, true)
     }
 
     #[must_use]
@@ -90,5 +112,32 @@ impl Mirror {
     #[must_use]
     pub const fn details(&self) -> &Url {
         &self.details
+    }
+
+    /// Measure the mirror speed.
+    ///
+    /// TODO: Support `rsync`.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`MeasurementError`] if a URL parsing or request error occurs.
+    pub async fn measure(&self) -> Result<Duration, MeasurementError> {
+        let start = Instant::now();
+        let _extra_db = get(self.url.join(EXTRA_DB_PATH)?)
+            .await?
+            .error_for_status()?
+            .bytes()
+            .await?;
+        Ok(start.elapsed())
+    }
+
+    /// Measure the mirror and return a measured mirror.
+    pub async fn measured(self) -> MeasuredMirror {
+        let duration = self
+            .measure()
+            .await
+            .inspect_err(|error| error!("{error}"))
+            .ok();
+        MeasuredMirror::new(self, duration)
     }
 }

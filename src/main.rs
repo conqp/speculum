@@ -5,11 +5,10 @@ use std::process::ExitCode;
 
 use log::{debug, error};
 
-use crate::mirrors::{Country, Mirrors};
+use crate::mirrors::{Country, MeasurementError, Mirror, Mirrors, Protocol};
 
 mod args;
 mod country;
-mod filter;
 mod mirrors;
 
 const URL: &str = "https://archlinux.org/mirrors/status/json/";

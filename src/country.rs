@@ -1,4 +1,5 @@
-use std::str::FromStr;
+use clap::ValueEnum;
+use clap::builder::PossibleValue;
 
 /// Available countries.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
@@ -7,15 +8,15 @@ pub enum Country {
     Germany,
 }
 
-impl FromStr for Country {
-    type Err = String;
+impl ValueEnum for Country {
+    fn value_variants<'a>() -> &'a [Self] {
+        &[Self::France, Self::Germany]
+    }
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        // TODO: Implement all countries.
-        match s {
-            "France" | "FR" => Ok(Self::France),
-            "Germany" | "DE" => Ok(Self::Germany),
-            other => Err(other.to_owned()),
+    fn to_possible_value(&self) -> Option<PossibleValue> {
+        match self {
+            Self::France => Some(PossibleValue::new("France").alias("FR")),
+            Self::Germany => Some(PossibleValue::new("Germany").alias("DE")),
         }
     }
 }
